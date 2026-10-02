@@ -615,6 +615,14 @@ button.grid-cell:hover {
   border-top: 1px solid rgba(255, 255, 255, 0.7);
 }
 
+
+/*
+   IMPORTANT:
+   app.js calculates the final font-size.
+
+   Do not add print-specific font sizes to this element.
+*/
+
 .clue-part-text {
   width: 100%;
   height: 100%;
@@ -662,13 +670,15 @@ button.grid-cell:hover {
 
 
 /* ============================================================
-   NEW ARROW SYSTEM
+   ARROW SYSTEM
 
-   IMPORTANT:
-   - black arrows
-   - solid filled triangular heads
-   - connected directly to clue box
-   - arrow graphics do not participate in clue text fitting
+   Arrows are deliberately NOT children of the clue text
+   layout.
+
+   This means:
+   - they do not reduce available definition space
+   - they do not affect font fitting
+   - they can extend across the clue/letter boundary
 ============================================================ */
 
 .clue-arrow-layer {
@@ -706,83 +716,105 @@ button.grid-cell:hover {
 
 /* ============================================================
    DEFINITION POSITION
+
+   app.js supplies:
+   --definition-index
+   --definition-count
+
+   We avoid multiplication of CSS custom properties here.
+   This is more reliable across browsers.
+
+   Horizontal-entry arrows use top positions based on whether
+   the clue contains 1, 2 or 3 definitions.
 ============================================================ */
 
 .clue-route-arrow {
-  --part-height:
-    calc(
-      100% /
-      var(--definition-count)
-    );
+  top: calc(50% - 10px);
+}
 
-  --part-center:
-    calc(
-      (
-        var(--definition-index) + 0.5
-      ) *
-      var(--part-height)
-    );
+
+/* ONE DEFINITION */
+
+.clue-route-arrow[style*="--definition-count: 1"] {
+  top: calc(50% - 10px);
+}
+
+
+/* TWO DEFINITIONS */
+
+.clue-route-arrow[style*="--definition-count: 2"][style*="--definition-index: 0"] {
+  top: calc(25% - 10px);
+}
+
+.clue-route-arrow[style*="--definition-count: 2"][style*="--definition-index: 1"] {
+  top: calc(75% - 10px);
+}
+
+
+/* THREE DEFINITIONS */
+
+.clue-route-arrow[style*="--definition-count: 3"][style*="--definition-index: 0"] {
+  top: calc(16.6667% - 10px);
+}
+
+.clue-route-arrow[style*="--definition-count: 3"][style*="--definition-index: 1"] {
+  top: calc(50% - 10px);
+}
+
+.clue-route-arrow[style*="--definition-count: 3"][style*="--definition-index: 2"] {
+  top: calc(83.3333% - 10px);
 }
 
 
 /* ============================================================
-   ATTACH ARROWS TO CLUE BOX
+   ATTACH ARROWS TO CLUE EDGE
 
-   Instead of floating halfway away from the clue,
-   the first part of the line begins directly on the
-   definition-box edge.
+   20px arrow graphic.
+   10px sits on each side of the clue/first-letter boundary.
+
+   The line begins at the clue edge with no visible gap.
 ============================================================ */
 
 .route-entry-right {
-  right: -17px;
-
-  top:
-    calc(
-      var(--part-center) -
-      var(--arrow-size) / 2
-    );
+  right: -10px;
 }
 
 .route-entry-left {
-  left: -17px;
-
-  top:
-    calc(
-      var(--part-center) -
-      var(--arrow-size) / 2
-    );
+  left: -10px;
 }
+
+
+/*
+   For arrows entering UP/DOWN, horizontal positioning is
+   based on definition index.
+
+   In normal Romanian integrame clue cells the definitions
+   are vertically divided, so this keeps the vertical-entry
+   arrow centred while allowing multiple definitions.
+*/
+
+.route-entry-up,
+.route-entry-down {
+  left: calc(50% - 10px);
+}
+
+
+/*
+   UP begins across the top boundary.
+*/
 
 .route-entry-up {
-  top: -17px;
-
-  left:
-    calc(
-      (
-        var(--definition-index) + 0.5
-      ) *
-      (
-        100% /
-        var(--definition-count)
-      ) -
-      var(--arrow-size) / 2
-    );
+  top: -10px !important;
 }
 
-.route-entry-down {
-  bottom: -17px;
 
-  left:
-    calc(
-      (
-        var(--definition-index) + 0.5
-      ) *
-      (
-        100% /
-        var(--definition-count)
-      ) -
-      var(--arrow-size) / 2
-    );
+/*
+   DOWN begins across the bottom boundary.
+*/
+
+.route-entry-down {
+  top: auto !important;
+  bottom: -10px;
 }
 
 
@@ -816,7 +848,7 @@ button.grid-cell:hover {
 
 
 /* ============================================================
-   STRAIGHT RIGHT
+   STRAIGHT RIGHT  →
 ============================================================ */
 
 .route-right .route-line-a {
@@ -838,7 +870,51 @@ button.grid-cell:hover {
 
 
 /* ============================================================
-   STRAIGHT DOWN
+   STRAIGHT LEFT  ←
+============================================================ */
+
+.route-left .route-line-a {
+  right: 0;
+  top: 9px;
+
+  width: 14px;
+  height: 3px;
+}
+
+.route-left .route-arrow-head {
+  left: 0;
+  top: 5px;
+
+  border-top: 6px solid transparent;
+  border-bottom: 6px solid transparent;
+  border-right: 8px solid #000;
+}
+
+
+/* ============================================================
+   STRAIGHT UP  ↑
+============================================================ */
+
+.route-up .route-line-a {
+  left: 9px;
+  bottom: 0;
+
+  width: 3px;
+  height: 14px;
+}
+
+.route-up .route-arrow-head {
+  left: 5px;
+  top: 0;
+
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-bottom: 8px solid #000;
+}
+
+
+/* ============================================================
+   STRAIGHT DOWN  ↓
 ============================================================ */
 
 .route-down .route-line-a {
@@ -1004,7 +1080,7 @@ button.grid-cell:hover {
 
 .route-up-right .route-line-a {
   left: 7px;
-  top: 0;
+  bottom: 9px;
 
   width: 3px;
   height: 11px;
@@ -1037,7 +1113,7 @@ button.grid-cell:hover {
 
 .route-up-left .route-line-a {
   right: 7px;
-  top: 0;
+  bottom: 9px;
 
   width: 3px;
   height: 11px;
@@ -1063,12 +1139,6 @@ button.grid-cell:hover {
 
 /* ============================================================
    DOWN → RIGHT
-   CORRECTED ORIENTATION
-
-   The arrow begins at the BOTTOM edge of the clue,
-   travels DOWN into the first-letter cell,
-   bends RIGHT,
-   and ends with a solid triangle pointing RIGHT.
 
    │
    │
@@ -1103,7 +1173,6 @@ button.grid-cell:hover {
 
 /* ============================================================
    DOWN → LEFT
-   CORRECTED MATCHING ORIENTATION
 
            │
            │
@@ -1171,11 +1240,13 @@ button.grid-cell:hover {
   background: var(--text-light);
 }
 
-.status-indicator.valid {
+.status-indicator.valid,
+.status-indicator.success {
   background: var(--success);
 }
 
-.status-indicator.invalid {
+.status-indicator.invalid,
+.status-indicator.error {
   background: var(--danger);
 }
 
@@ -1715,6 +1786,9 @@ button.grid-cell:hover {
   display: block;
 }
 
+
+/* RIGHT → */
+
 .direction-icon-right::before {
   left: 2px;
   top: 10px;
@@ -1736,6 +1810,59 @@ button.grid-cell:hover {
   border-bottom: 4px solid transparent;
   border-left: 6px solid currentColor;
 }
+
+
+/* LEFT ← */
+
+.direction-icon-left::before {
+  right: 2px;
+  top: 10px;
+
+  width: 15px;
+  height: 2px;
+
+  background: currentColor;
+}
+
+.direction-icon-left::after {
+  left: 1px;
+  top: 7px;
+
+  width: 0;
+  height: 0;
+
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+  border-right: 6px solid currentColor;
+}
+
+
+/* UP ↑ */
+
+.direction-icon-up::before {
+  left: 10px;
+  bottom: 2px;
+
+  width: 2px;
+  height: 15px;
+
+  background: currentColor;
+}
+
+.direction-icon-up::after {
+  left: 7px;
+  top: 0;
+
+  width: 0;
+  height: 0;
+
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-bottom: 6px solid currentColor;
+}
+
+
+/* DOWN ↓ */
 
 .direction-icon-down::before {
   left: 10px;
@@ -1760,7 +1887,9 @@ button.grid-cell:hover {
 }
 
 
-/* BENT PREVIEWS */
+/* ============================================================
+   BENT DIRECTION PREVIEWS
+============================================================ */
 
 .direction-bent .direction-icon::before {
   width: 12px;
@@ -1770,9 +1899,13 @@ button.grid-cell:hover {
   border-color: currentColor;
 }
 
+
+/* RIGHT → UP */
+
 .direction-icon-right-up::before {
   left: 3px;
   top: 5px;
+
   border-width: 0 2px 2px 0;
 }
 
@@ -1788,9 +1921,13 @@ button.grid-cell:hover {
   border-bottom: 6px solid currentColor;
 }
 
+
+/* RIGHT → DOWN */
+
 .direction-icon-right-down::before {
   left: 3px;
   top: 5px;
+
   border-width: 2px 2px 0 0;
 }
 
@@ -1806,9 +1943,13 @@ button.grid-cell:hover {
   border-top: 6px solid currentColor;
 }
 
+
+/* LEFT → UP */
+
 .direction-icon-left-up::before {
   right: 3px;
   top: 5px;
+
   border-width: 0 0 2px 2px;
 }
 
@@ -1824,9 +1965,13 @@ button.grid-cell:hover {
   border-bottom: 6px solid currentColor;
 }
 
+
+/* LEFT → DOWN */
+
 .direction-icon-left-down::before {
   right: 3px;
   top: 5px;
+
   border-width: 2px 0 0 2px;
 }
 
@@ -1842,9 +1987,13 @@ button.grid-cell:hover {
   border-top: 6px solid currentColor;
 }
 
+
+/* UP → RIGHT */
+
 .direction-icon-up-right::before {
   left: 5px;
   top: 3px;
+
   border-width: 2px 0 0 2px;
 }
 
@@ -1860,9 +2009,13 @@ button.grid-cell:hover {
   border-left: 6px solid currentColor;
 }
 
+
+/* UP → LEFT */
+
 .direction-icon-up-left::before {
   right: 5px;
   top: 3px;
+
   border-width: 2px 2px 0 0;
 }
 
@@ -1879,7 +2032,7 @@ button.grid-cell:hover {
 }
 
 
-/* corrected DOWN → RIGHT preview */
+/* DOWN → RIGHT */
 
 .direction-icon-down-right::before {
   left: 5px;
@@ -1901,7 +2054,7 @@ button.grid-cell:hover {
 }
 
 
-/* corrected DOWN → LEFT preview */
+/* DOWN → LEFT */
 
 .direction-icon-down-left::before {
   right: 5px;
@@ -1924,90 +2077,110 @@ button.grid-cell:hover {
 
 
 /* ============================================================
-   SPECIAL WORD
+   END STYLE.CSS — PART 1/2
+============================================================ *//* ============================================================
+   SPECIAL WORD CONTROL
 ============================================================ */
 
 .special-word-control {
-  margin-top: 11px;
-  padding: 8px;
+  margin-top: 10px;
+}
 
+.special-word-label {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 8px;
 
-  border: 1px solid #e8d15b;
+  padding: 8px 9px;
+
+  border: 1px solid var(--border);
   border-radius: 7px;
 
-  background: #fffbea;
+  background: #fffdf0;
+
+  color: var(--text);
+
+  font-size: 10.5px;
+  font-weight: 650;
 
   cursor: pointer;
 }
 
 .special-word-checkbox {
-  position: absolute;
-  opacity: 0;
-  pointer-events: none;
+  width: 15px;
+  height: 15px;
+
+  margin: 0;
+
+  accent-color: #d9b800;
 }
 
-.special-checkbox-visual {
-  width: 17px;
-  height: 17px;
 
-  flex: 0 0 17px;
+/* ============================================================
+   APPLY DEFINITIONS
+============================================================ */
 
-  border: 1px solid #b7a43f;
-  border-radius: 4px;
-
-  background: white;
-
-  position: relative;
-}
-
-.special-word-checkbox:checked + .special-checkbox-visual {
-  background: var(--special);
-}
-
-.special-word-checkbox:checked + .special-checkbox-visual::after {
-  content: "✓";
-
-  position: absolute;
-  inset: 0;
-
-  display: grid;
-  place-items: center;
-
-  color: #332d00;
-
-  font-size: 12px;
-  font-weight: 900;
-}
-
-.special-word-text {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.special-word-text strong {
-  font-size: 10.5px;
-}
-
-.special-word-text small {
-  color: var(--text-soft);
-
-  font-size: 9.5px;
-  line-height: 1.35;
-}
-
-.editor-actions {
+.apply-definitions-row {
   margin-top: 12px;
 }
 
-.editor-footer {
-  margin-top: 16px;
-  padding-top: 16px;
 
-  border-top: 1px solid var(--border);
+/* ============================================================
+   VALIDATION PANEL
+============================================================ */
+
+.validation-panel {
+  margin-top: 20px;
+  padding: 18px;
+}
+
+.validation-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+
+  margin-bottom: 12px;
+}
+
+.validation-header h2 {
+  margin: 0;
+  font-size: 17px;
+}
+
+.validation-summary {
+  margin: 5px 0 0;
+
+  color: var(--text-soft);
+
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.validation-issues {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.validation-item {
+  padding: 9px 11px;
+
+  border: 1px solid #f2c6c2;
+  border-radius: 7px;
+
+  background: var(--danger-soft);
+  color: #8d241c;
+
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.validation-item.success {
+  border-color: #a6e4c5;
+
+  background: var(--success-soft);
+  color: #087443;
 }
 
 
@@ -2022,145 +2195,128 @@ button.grid-cell:hover {
 .preview-page {
   width: min(100%, 900px);
 
+  min-height: 900px;
+
   margin: 0 auto;
-  padding: 36px;
+
+  padding: 38px;
 
   background: white;
 
   border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border-radius: 10px;
 
   box-shadow: var(--shadow);
 }
 
-.print-header {
-  margin-bottom: 24px;
+.preview-title {
+  margin: 0 0 28px;
+
   text-align: center;
+
+  color: #111827;
+
+  font-size: 26px;
+  font-weight: 800;
+  line-height: 1.2;
 }
 
-.print-header h1 {
-  margin: 0;
-  font-size: 25px;
-}
 
-.print-header p {
-  margin: 6px 0 0;
+/* ============================================================
+   PRINT GRID AREA
 
-  color: var(--text-soft);
-  font-size: 12px;
-}
+   The JavaScript sets width/height here after calculating
+   the uniform print scale.
+
+   Do not resize individual cells in this container.
+============================================================ */
 
 .print-grid-area {
-  display: flex;
-  justify-content: center;
+  position: relative;
+
+  width: fit-content;
+
+  margin: 0 auto;
 
   overflow: visible;
 }
 
 .preview-grid-scale {
-  width: max-content;
-  transform-origin: top center;
-}
+  width: fit-content;
 
-.preview-grid {
-  margin: 0 auto;
+  transform-origin: top left;
+
+  overflow: visible;
 }
 
 
 /* ============================================================
-   VALIDATION
+   PREVIEW GRID
+
+   IMPORTANT:
+   The same --cell-size is used in Creator and Preview.
+
+   This allows fitClueText() to calculate exactly the same
+   definition font size in both views.
 ============================================================ */
 
-.validation-panel {
-  margin-top: 20px;
-  padding: 18px;
+.preview-grid {
+  margin: 0;
+
+  --cell-size: 48px;
 }
 
-.validation-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
 
-  margin-bottom: 14px;
+/* ============================================================
+   PREVIEW LETTERS
+
+   Answers are hidden in Preview by app.js, but this keeps
+   the cell dimensions and typography stable.
+============================================================ */
+
+.preview-grid .grid-cell {
+  width: var(--cell-size);
+  height: var(--cell-size);
+
+  min-width: var(--cell-size);
+  min-height: var(--cell-size);
 }
 
-.validation-header h2 {
-  margin: 2px 0 0;
-  font-size: 17px;
+
+/* ============================================================
+   PREVIEW CLUE TEXT
+
+   DO NOT add a font-size here.
+
+   app.js fits every clue individually and stores the final
+   font-size inline.
+
+   An inline font-size must survive unchanged into print.
+============================================================ */
+
+.preview-grid .clue-part-text {
+  word-break: normal;
+  overflow-wrap: normal;
+  hyphens: none;
+
+  white-space: normal;
+
+  line-height: 1.05;
 }
 
-.validation-summary {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
 
-  margin-bottom: 14px;
-}
+/* ============================================================
+   PREVIEW IMAGE DEFINITIONS
+============================================================ */
 
-.validation-summary-item {
-  min-width: 105px;
-  padding: 10px;
+.preview-grid .clue-image {
+  width: 100%;
+  height: 100%;
 
-  border: 1px solid var(--border);
-  border-radius: 8px;
+  object-fit: contain;
 
-  background: var(--surface-soft);
-
-  display: flex;
-  flex-direction: column;
-}
-
-.validation-summary-item strong {
-  font-size: 18px;
-}
-
-.validation-summary-item span {
-  margin-top: 2px;
-
-  color: var(--text-soft);
-
-  font-size: 8px;
-  font-weight: 800;
-
-  letter-spacing: 0.05em;
-}
-
-.validation-issues {
-  display: flex;
-  flex-direction: column;
-  gap: 7px;
-}
-
-.validation-issue {
-  padding: 9px 10px;
-
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-
-  border: 1px solid var(--border);
-  border-radius: 7px;
-
-  font-size: 11px;
-  line-height: 1.4;
-}
-
-.validation-issue.error {
-  border-color: #f2b8b3;
-  background: var(--danger-soft);
-  color: #9b1c13;
-}
-
-.validation-issue.warning {
-  border-color: #f4d28c;
-  background: var(--warning-soft);
-  color: #8a4b00;
-}
-
-.validation-issue.success {
-  border-color: #a6e3c5;
-  background: var(--success-soft);
-  color: #067647;
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
 }
 
 
@@ -2172,38 +2328,42 @@ button.grid-cell:hover {
   position: fixed;
 
   left: 50%;
-  bottom: 26px;
+  bottom: 24px;
 
   z-index: 1000;
 
-  max-width: min(440px, calc(100vw - 30px));
+  max-width: min(520px, calc(100vw - 32px));
 
-  padding: 10px 15px;
+  padding: 11px 16px;
 
   border-radius: 9px;
 
-  background: #111827;
+  background: #172033;
   color: white;
 
-  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.24);
+  box-shadow:
+    0 12px 30px rgba(16, 24, 40, 0.22);
 
   font-size: 12px;
-  line-height: 1.4;
+  font-weight: 650;
 
   opacity: 0;
 
   pointer-events: none;
 
-  transform: translate(-50%, 12px);
+  transform:
+    translate(-50%, 14px);
 
   transition:
-    opacity 0.18s ease,
-    transform 0.18s ease;
+    opacity 0.2s ease,
+    transform 0.2s ease;
 }
 
 .toast.show {
   opacity: 1;
-  transform: translate(-50%, 0);
+
+  transform:
+    translate(-50%, 0);
 }
 
 
@@ -2211,76 +2371,72 @@ button.grid-cell:hover {
    RESPONSIVE
 ============================================================ */
 
-@media (max-width: 1100px) {
+@media (max-width: 1180px) {
+
+  .workspace {
+    grid-template-columns:
+      minmax(0, 1fr)
+      340px;
+  }
+
+  .editor-panel {
+    top: 98px;
+  }
+
+}
+
+
+@media (max-width: 980px) {
+
+  .app-header {
+    position: relative;
+
+    flex-direction: column;
+    align-items: stretch;
+
+    gap: 14px;
+  }
+
+  .header-actions {
+    justify-content: space-between;
+  }
 
   .workspace {
     grid-template-columns: 1fr;
   }
 
   .editor-panel {
-    position: static;
+    position: relative;
+    top: auto;
+
     max-height: none;
   }
 
-}
-
-@media (max-width: 760px) {
-
-  .app-header {
-    position: static;
-
-    padding: 14px 16px;
-
-    align-items: flex-start;
-    flex-direction: column;
-  }
-
-  .header-actions {
-    width: 100%;
-    justify-content: space-between;
-  }
-
-  .app-container {
-    padding: 14px;
-  }
-
   .toolbar {
-    align-items: stretch;
     flex-direction: column;
-  }
-
-  .title-field {
-    max-width: none;
+    align-items: stretch;
   }
 
   .grid-size-controls {
     flex-wrap: wrap;
   }
 
-  .section-heading {
-    flex-direction: column;
-  }
-
-  .grid-status {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-
-  .preview-page {
-    padding: 18px;
-  }
-
 }
 
-@media (max-width: 480px) {
 
-  .brand-text p {
-    display: none;
+@media (max-width: 700px) {
+
+  .app-container {
+    padding: 12px;
+  }
+
+  .app-header {
+    padding: 14px;
   }
 
   .header-actions {
-    align-items: stretch;
     flex-direction: column;
+    align-items: stretch;
   }
 
   .view-switcher {
@@ -2291,6 +2447,33 @@ button.grid-cell:hover {
     flex: 1;
   }
 
+  .primary-button {
+    width: 100%;
+  }
+
+  .grid-section {
+    padding: 12px;
+  }
+
+  .section-heading {
+    flex-direction: column;
+  }
+
+  .grid-status {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .preview-page {
+    padding: 20px 12px;
+
+    min-height: auto;
+  }
+
+  .preview-title {
+    font-size: 21px;
+  }
+
   .direction-selector {
     grid-template-columns: 1fr;
   }
@@ -2299,25 +2482,67 @@ button.grid-cell:hover {
 
 
 /* ============================================================
-   PRINT
+   PRINT / PDF
+
+   IMPORTANT DESIGN RULE:
+
+   The PDF must reproduce the Preview grid rather than create
+   a second print-specific version of it.
+
+   JavaScript has already:
+   1. rendered Preview
+   2. measured the real 48px cells
+   3. fitted every clue
+   4. locked each clue's font-size inline
+   5. calculated one uniform scale for the whole grid
+
+   Therefore this section must NOT:
+   - change --cell-size
+   - change clue font-size
+   - change clue padding
+   - change line-height
+   - resize images independently
+   - resize arrows independently
 ============================================================ */
 
 @page {
   size: A4 portrait;
-  margin: 10mm;
+  margin: 12mm;
 }
+
 
 @media print {
 
+  /* ----------------------------------------------------------
+     GENERAL
+  ---------------------------------------------------------- */
+
   html,
   body {
-    width: 100%;
+    width: auto !important;
+    height: auto !important;
 
-    margin: 0;
-    padding: 0;
+    margin: 0 !important;
+    padding: 0 !important;
 
-    background: white;
+    background: white !important;
+
+    overflow: visible !important;
+
+    print-color-adjust: exact !important;
+    -webkit-print-color-adjust: exact !important;
   }
+
+
+  * {
+    print-color-adjust: exact !important;
+    -webkit-print-color-adjust: exact !important;
+  }
+
+
+  /* ----------------------------------------------------------
+     HIDE CREATOR UI
+  ---------------------------------------------------------- */
 
   .app-header,
   #creatorToolbar,
@@ -2327,125 +2552,597 @@ button.grid-cell:hover {
     display: none !important;
   }
 
+
+  /* ----------------------------------------------------------
+     APP CONTAINER
+  ---------------------------------------------------------- */
+
   .app-container {
-    width: 100%;
+    width: 100% !important;
 
-    margin: 0;
-    padding: 0;
+    margin: 0 !important;
+    padding: 0 !important;
+
+    overflow: visible !important;
   }
 
-  #previewView {
+
+  /*
+     CRITICAL:
+
+     The generic .hidden class normally uses
+     display:none !important.
+
+     When Print is started from Creator mode, #previewView
+     returns to its hidden screen state before window.print().
+
+     Therefore print must explicitly force Preview back into
+     the print layout.
+
+     ID + !important gives this rule enough specificity to
+     override .hidden.
+  */
+
+  #previewView,
+  #previewView.hidden {
     display: block !important;
-    width: 100%;
+
+    position: static !important;
+
+    width: 100% !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    visibility: visible !important;
+
+    overflow: visible !important;
+
+    pointer-events: auto !important;
   }
 
+
+  /* ----------------------------------------------------------
+     PRINT PAGE
+  ---------------------------------------------------------- */
+
+  #previewPage,
   .preview-page {
-    width: 100%;
+    display: block !important;
 
-    margin: 0;
-    padding: 0;
+    width: 100% !important;
+    max-width: none !important;
+    min-height: 0 !important;
 
-    border: 0;
-    border-radius: 0;
+    margin: 0 !important;
+    padding: 0 !important;
 
-    box-shadow: none;
+    border: 0 !important;
+    border-radius: 0 !important;
+
+    box-shadow: none !important;
+
+    background: white !important;
+
+    overflow: visible !important;
   }
 
-  .print-header {
-    margin: 0 0 7mm;
+
+  /* ----------------------------------------------------------
+     TITLE
+  ---------------------------------------------------------- */
+
+  #previewTitle,
+  .preview-title {
+    margin:
+      0
+      0
+      8mm !important;
+
+    padding: 0 !important;
+
+    color: #111827 !important;
+
+    text-align: center !important;
+
+    font-size: 22px !important;
+    font-weight: 800 !important;
+    line-height: 1.2 !important;
+
+    break-after: avoid;
     page-break-after: avoid;
   }
 
-  .print-header h1 {
-    font-size: 20pt;
-  }
 
-  .print-header p {
-    font-size: 9pt;
-  }
+  /* ----------------------------------------------------------
+     GRID AREA
 
+     JavaScript supplies the scaled width and height.
+  ---------------------------------------------------------- */
+
+  #printGridArea,
   .print-grid-area {
-    width: 100%;
+    position: relative !important;
 
-    display: flex;
-    justify-content: center;
+    display: block !important;
 
-    overflow: visible;
+    margin:
+      0
+      auto !important;
+
+    padding: 0 !important;
+
+    overflow: visible !important;
+
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
   }
 
+
+  /* ----------------------------------------------------------
+     SCALE WRAPPER
+
+     DO NOT replace this transform.
+
+     app.js supplies:
+
+       transform: scale(...)
+
+     inline before the print dialog opens.
+  ---------------------------------------------------------- */
+
+  #previewGridScale,
   .preview-grid-scale {
-    width: max-content;
-    transform-origin: top center;
+    position: relative !important;
+
+    display: block !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    transform-origin:
+      top left !important;
+
+    overflow: visible !important;
+
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
   }
 
-  .crossword-grid {
-    margin: 0 auto;
 
-    page-break-inside: avoid;
+  /* ----------------------------------------------------------
+     GRID
 
-    print-color-adjust: exact;
-    -webkit-print-color-adjust: exact;
+     CRITICAL:
+     Do not redefine --cell-size in print.
+  ---------------------------------------------------------- */
+
+  #previewGrid,
+  .preview-grid,
+  .crossword-grid.preview-grid {
+    display: grid !important;
+
+    width: max-content !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    overflow: visible !important;
+
+    background: white !important;
+
+    border-top:
+      var(--cell-border)
+      solid
+      #303846 !important;
+
+    border-left:
+      var(--cell-border)
+      solid
+      #303846 !important;
+
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
   }
 
-  .grid-cell,
-  .clue-cell,
-  .blocked-cell,
-  .special-cell,
-  .clue-part,
-  .clue-cell-content,
-  .route-line,
-  .route-arrow-head {
-    print-color-adjust: exact;
-    -webkit-print-color-adjust: exact;
+
+  /* ----------------------------------------------------------
+     CELLS
+
+     Same 48 × 48 proportions as Creator/Preview.
+
+     No print-specific resizing.
+  ---------------------------------------------------------- */
+
+  #previewGrid .grid-cell {
+    position: relative !important;
+
+    width:
+      var(--cell-size) !important;
+
+    height:
+      var(--cell-size) !important;
+
+    min-width:
+      var(--cell-size) !important;
+
+    min-height:
+      var(--cell-size) !important;
+
+    max-width:
+      var(--cell-size) !important;
+
+    max-height:
+      var(--cell-size) !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    border-top: 0 !important;
+    border-left: 0 !important;
+
+    border-right:
+      var(--cell-border)
+      solid
+      #303846 !important;
+
+    border-bottom:
+      var(--cell-border)
+      solid
+      #303846 !important;
+
+    box-shadow: none !important;
+
+    overflow: visible !important;
   }
 
-  .clue-cell,
-  .clue-cell-content,
-  .clue-part {
-    background: #050505 !important;
+
+  /* ----------------------------------------------------------
+     NORMAL LETTER CELLS
+  ---------------------------------------------------------- */
+
+  #previewGrid .letter-cell {
+    background: white !important;
+    color: #111827 !important;
+  }
+
+
+  #previewGrid .cell-letter {
+    font-size: 20px !important;
+    font-weight: 800 !important;
+    line-height: 1 !important;
+  }
+
+
+  /* ----------------------------------------------------------
+     SPECIAL WORD CELLS
+
+     Yellow remains yellow in PDF.
+  ---------------------------------------------------------- */
+
+  #previewGrid .special-cell {
+    background:
+      var(--special) !important;
+  }
+
+
+  #previewGrid .special-cell .cell-letter {
+    color: #111 !important;
+  }
+
+
+  /* ----------------------------------------------------------
+     BLOCKED CELLS
+  ---------------------------------------------------------- */
+
+  #previewGrid .blocked-cell {
+    background:
+      var(--blocked) !important;
+  }
+
+
+  /* ----------------------------------------------------------
+     CLUE CELLS
+  ---------------------------------------------------------- */
+
+  #previewGrid .clue-cell {
+    position: relative !important;
+
+    background:
+      var(--clue-bg) !important;
+
+    color:
+      var(--clue-text) !important;
+
+    overflow: visible !important;
+  }
+
+
+  #previewGrid .clue-cell-content {
+    position: absolute !important;
+
+    inset: 0 !important;
+
+    display: flex !important;
+    flex-direction: column !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    overflow: hidden !important;
+
+    background:
+      var(--clue-bg) !important;
+
+    color:
+      white !important;
+  }
+
+
+  /* ----------------------------------------------------------
+     DEFINITION SUBSECTIONS
+
+     Keep EXACT same padding/proportions as normal view.
+  ---------------------------------------------------------- */
+
+  #previewGrid .clue-part {
+    position: relative !important;
+
+    flex:
+      1
+      1
+      0 !important;
+
+    min-width: 0 !important;
+    min-height: 0 !important;
+
+    display: flex !important;
+
+    align-items: center !important;
+    justify-content: center !important;
+
+    margin: 0 !important;
+
+    padding:
+      2px
+      3px !important;
+
+    overflow: hidden !important;
+
+    background:
+      var(--clue-bg) !important;
+
     color: white !important;
   }
 
-  .clue-part-text {
+
+  #previewGrid .clue-part + .clue-part {
+    border-top:
+      1px
+      solid
+      rgba(255, 255, 255, 0.7) !important;
+  }
+
+
+  /* ----------------------------------------------------------
+     CLUE TEXT — CRITICAL PDF FIX
+
+     THERE IS INTENTIONALLY NO FONT-SIZE PROPERTY HERE.
+
+     app.js has already measured and fitted the definition
+     while the Preview grid had real dimensions.
+
+     The resulting font-size exists as an inline style:
+
+       style="font-size: 7.5px"
+
+     Print must preserve that exact value.
+
+     Also do not alter padding or available text dimensions.
+  ---------------------------------------------------------- */
+
+  #previewGrid .clue-part-text {
+    width: 100% !important;
+    height: 100% !important;
+
+    min-width: 0 !important;
+    min-height: 0 !important;
+
+    display: flex !important;
+
+    align-items: center !important;
+    justify-content: center !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    overflow: hidden !important;
+
     color: white !important;
+
+    text-align: center !important;
+
+    font-weight: 700 !important;
+
+    /*
+       No font-size here.
+    */
+
+    line-height: 1.05 !important;
+
+    white-space: normal !important;
+
+    word-break: normal !important;
+    overflow-wrap: normal !important;
+    hyphens: none !important;
   }
 
-  .special-cell {
-    background: #ffe66b !important;
+
+  /* ----------------------------------------------------------
+     IMAGE DEFINITIONS
+  ---------------------------------------------------------- */
+
+  #previewGrid .image-clue-part {
+    padding: 1px !important;
   }
 
-  .blocked-cell {
-    background: #273142 !important;
+
+  #previewGrid .clue-image {
+    width: 100% !important;
+    height: 100% !important;
+
+    max-width: 100% !important;
+    max-height: 100% !important;
+
+    margin: 0 !important;
+
+    object-fit: contain !important;
+
+    background: black !important;
   }
 
-  /*
-     New arrow design remains BLACK when printed.
-  */
 
-  .route-line {
+  /* ----------------------------------------------------------
+     ARROW LAYER
+
+     Arrows remain independent of clue text.
+  ---------------------------------------------------------- */
+
+  #previewGrid .clue-arrow-layer {
+    position: absolute !important;
+
+    inset: 0 !important;
+
+    z-index: 15 !important;
+
+    overflow: visible !important;
+
+    pointer-events: none !important;
+  }
+
+
+  #previewGrid .clue-route-arrow {
+    position: absolute !important;
+
+    width: 20px !important;
+    height: 20px !important;
+
+    overflow: visible !important;
+
+    color: #000 !important;
+
+    pointer-events: none !important;
+  }
+
+
+  /* ----------------------------------------------------------
+     ARROW LINES MUST STAY BLACK
+  ---------------------------------------------------------- */
+
+  #previewGrid .route-line {
     background: #000 !important;
   }
 
-  .route-right .route-arrow-head,
-  .route-up-right .route-arrow-head,
-  .route-down-right .route-arrow-head {
-    border-left-color: #000 !important;
+
+  /* ----------------------------------------------------------
+     RIGHT HEAD
+  ---------------------------------------------------------- */
+
+  #previewGrid .route-right .route-arrow-head,
+  #previewGrid .route-up-right .route-arrow-head,
+  #previewGrid .route-down-right .route-arrow-head {
+    border-left-color:
+      #000 !important;
   }
 
-  .route-up-left .route-arrow-head,
-  .route-down-left .route-arrow-head {
-    border-right-color: #000 !important;
+
+  /* ----------------------------------------------------------
+     LEFT HEAD
+  ---------------------------------------------------------- */
+
+  #previewGrid .route-left .route-arrow-head,
+  #previewGrid .route-up-left .route-arrow-head,
+  #previewGrid .route-down-left .route-arrow-head {
+    border-right-color:
+      #000 !important;
   }
 
-  .route-down .route-arrow-head,
-  .route-right-down .route-arrow-head,
-  .route-left-down .route-arrow-head {
-    border-top-color: #000 !important;
+
+  /* ----------------------------------------------------------
+     UP HEAD
+  ---------------------------------------------------------- */
+
+  #previewGrid .route-up .route-arrow-head,
+  #previewGrid .route-right-up .route-arrow-head,
+  #previewGrid .route-left-up .route-arrow-head {
+    border-bottom-color:
+      #000 !important;
   }
 
-  .route-right-up .route-arrow-head,
-  .route-left-up .route-arrow-head {
-    border-bottom-color: #000 !important;
+
+  /* ----------------------------------------------------------
+     DOWN HEAD
+  ---------------------------------------------------------- */
+
+  #previewGrid .route-down .route-arrow-head,
+  #previewGrid .route-right-down .route-arrow-head,
+  #previewGrid .route-left-down .route-arrow-head {
+    border-top-color:
+      #000 !important;
+  }
+
+
+  /* ----------------------------------------------------------
+     REMOVE SCREEN INTERACTION EFFECTS
+  ---------------------------------------------------------- */
+
+  #previewGrid .grid-cell:hover,
+  #previewGrid .grid-cell.selected {
+    box-shadow: none !important;
   }
 
 }
+
+
+/* ============================================================
+   PRINT COLOUR FALLBACK
+
+   Chromium normally respects the declarations above when
+   "Background graphics" is enabled.
+
+   These rules also request exact colour reproduction.
+============================================================ */
+
+.clue-cell,
+.clue-cell-content,
+.clue-part,
+.special-cell,
+.blocked-cell,
+.clue-image {
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+
+
+/* ============================================================
+   ACCESSIBILITY / REDUCED MOTION
+============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+
+}
+
+
+/* ============================================================
+   END OF STYLE.CSS
+============================================================ */
