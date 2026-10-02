@@ -7,7 +7,7 @@
 
   <meta
     name="description"
-    content="Creator de integrame pentru realizarea și imprimarea grilelor."
+    content="Creator de integrame pentru realizarea, verificarea și imprimarea grilelor."
   >
 
   <title>Creator Integrame</title>
@@ -24,19 +24,25 @@
   <header class="app-header">
 
     <div class="brand">
-      <div class="brand-icon">
+
+      <div class="brand-icon" aria-hidden="true">
         <span>▦</span>
       </div>
 
       <div class="brand-text">
         <h1>Creator Integrame</h1>
-        <p>Creează, verifică și imprimă integrame.</p>
+        <p>Construiește manual. Verifică. Printează.</p>
       </div>
+
     </div>
+
 
     <div class="header-actions">
 
-      <div class="view-switcher">
+      <div
+        class="view-switcher"
+        aria-label="Mod de vizualizare"
+      >
 
         <button
           id="creatorModeBtn"
@@ -56,6 +62,7 @@
 
       </div>
 
+
       <button
         id="printBtn"
         class="primary-button"
@@ -70,14 +77,14 @@
 
 
   <!-- =========================================================
-       MAIN APPLICATION
+       MAIN
   ========================================================== -->
 
   <main class="app-container">
 
 
     <!-- =======================================================
-         TOP SETTINGS
+         TOP TOOLBAR
     ======================================================== -->
 
     <section
@@ -121,7 +128,10 @@
         </div>
 
 
-        <div class="grid-times">
+        <div
+          class="grid-times"
+          aria-hidden="true"
+        >
           ×
         </div>
 
@@ -166,7 +176,7 @@
 
 
     <!-- =======================================================
-         CREATOR WORKSPACE
+         CREATOR VIEW
     ======================================================== -->
 
     <section
@@ -176,7 +186,7 @@
 
 
       <!-- =====================================================
-           GRID AREA
+           GRID
       ====================================================== -->
 
       <div class="grid-section card">
@@ -184,29 +194,64 @@
         <div class="section-heading">
 
           <div>
+
             <h2>Grila</h2>
 
             <p>
-              Selectează o căsuță pentru a adăuga o definiție,
-              un răspuns sau un bloc.
+              Selectează o căsuță pentru a adăuga litere,
+              definiții, imagini sau blocuri.
             </p>
+
           </div>
+
 
           <div class="grid-legend">
 
             <span class="legend-item">
-              <span class="legend-box normal"></span>
+
+              <span
+                class="legend-box normal"
+                aria-hidden="true"
+              ></span>
+
               Literă
+
             </span>
 
+
             <span class="legend-item">
-              <span class="legend-box clue"></span>
+
+              <span
+                class="legend-box clue"
+                aria-hidden="true"
+              ></span>
+
               Definiție
+
             </span>
 
+
             <span class="legend-item">
-              <span class="legend-box blocked"></span>
+
+              <span
+                class="legend-box special"
+                aria-hidden="true"
+              ></span>
+
+              Cuvânt special
+
+            </span>
+
+
+            <span class="legend-item">
+
+              <span
+                class="legend-box blocked"
+                aria-hidden="true"
+              ></span>
+
               Blocat
+
             </span>
 
           </div>
@@ -220,13 +265,14 @@
             id="crosswordGrid"
             class="crossword-grid"
             aria-label="Grila integramei"
-          >
-          </div>
+          ></div>
 
         </div>
 
 
-        <!-- GRID STATUS -->
+        <!-- ===================================================
+             GRID STATUS
+        ==================================================== -->
 
         <div
           id="gridStatus"
@@ -260,6 +306,11 @@
             </span>
 
             <span>
+              <strong id="specialWordCount">0</strong>
+              speciale
+            </span>
+
+            <span>
               <strong id="conflictCount">0</strong>
               conflicte
             </span>
@@ -272,7 +323,7 @@
 
 
       <!-- =====================================================
-           CELL EDITOR
+           EDITOR PANEL
       ====================================================== -->
 
       <aside
@@ -283,12 +334,15 @@
         <div class="editor-header">
 
           <div>
+
             <span class="eyebrow">
               EDITOR
             </span>
 
             <h2>Căsuța selectată</h2>
+
           </div>
+
 
           <div
             id="selectedCellCoordinates"
@@ -300,12 +354,19 @@
         </div>
 
 
+        <!-- ===================================================
+             NO CELL SELECTED
+        ==================================================== -->
+
         <div
           id="noCellSelected"
           class="empty-editor-state"
         >
 
-          <div class="empty-editor-icon">
+          <div
+            class="empty-editor-icon"
+            aria-hidden="true"
+          >
             +
           </div>
 
@@ -319,19 +380,26 @@
         </div>
 
 
+        <!-- ===================================================
+             EDITOR CONTROLS
+        ==================================================== -->
+
         <div
           id="editorControls"
           class="editor-controls hidden"
         >
 
 
-          <!-- CELL TYPE -->
+          <!-- =================================================
+               CELL TYPE
+          ================================================== -->
 
           <div class="editor-section">
 
             <label class="section-label">
               Tipul căsuței
             </label>
+
 
             <div class="cell-type-options">
 
@@ -340,11 +408,16 @@
                 data-cell-type="letter"
                 type="button"
               >
-                <span class="type-preview letter-preview">
+
+                <span
+                  class="type-preview letter-preview"
+                  aria-hidden="true"
+                >
                   A
                 </span>
 
                 <span>Literă</span>
+
               </button>
 
 
@@ -353,11 +426,16 @@
                 data-cell-type="clue"
                 type="button"
               >
-                <span class="type-preview clue-preview">
+
+                <span
+                  class="type-preview clue-preview"
+                  aria-hidden="true"
+                >
                   →
                 </span>
 
                 <span>Definiție</span>
+
               </button>
 
 
@@ -366,10 +444,14 @@
                 data-cell-type="blocked"
                 type="button"
               >
-                <span class="type-preview blocked-preview">
-                </span>
+
+                <span
+                  class="type-preview blocked-preview"
+                  aria-hidden="true"
+                ></span>
 
                 <span>Blocat</span>
+
               </button>
 
             </div>
@@ -378,7 +460,7 @@
 
 
           <!-- =================================================
-               LETTER CELL SETTINGS
+               LETTER SETTINGS
           ================================================== -->
 
           <div
@@ -398,16 +480,17 @@
               autocomplete="off"
             >
 
+
             <p class="field-help">
-              Literele sunt completate automat atunci când
-              plasezi un răspuns, dar pot fi modificate manual.
+              Literele răspunsurilor sunt completate automat.
+              Poți introduce și o literă manual.
             </p>
 
           </div>
 
 
           <!-- =================================================
-               CLUE CELL SETTINGS
+               CLUE SETTINGS
           ================================================== -->
 
           <div
@@ -416,374 +499,63 @@
           >
 
 
-            <!-- NUMBER OF CLUES -->
+            <!-- ===============================================
+                 ADD DEFINITION
+            ================================================ -->
 
-            <div class="editor-section">
+            <div class="editor-section definition-toolbar">
 
-              <label class="section-label">
-                Număr de definiții în această căsuță
-              </label>
+              <div>
 
-              <div class="clue-count-selector">
+                <label class="section-label">
+                  Definiții
+                </label>
 
-                <button
-                  class="clue-count-button active"
-                  data-count="1"
-                  type="button"
-                >
-                  1
-                </button>
-
-                <button
-                  class="clue-count-button"
-                  data-count="2"
-                  type="button"
-                >
-                  2
-                </button>
-
-                <button
-                  class="clue-count-button"
-                  data-count="3"
-                  type="button"
-                >
-                  3
-                </button>
+                <p class="field-help">
+                  O căsuță poate conține maximum 3 definiții.
+                  Fiecare definiție poate avea mai multe
+                  răspunsuri.
+                </p>
 
               </div>
+
+
+              <button
+                id="addDefinitionBtn"
+                class="secondary-button"
+                type="button"
+              >
+                + Adaugă definiție
+              </button>
 
             </div>
 
 
-            <!-- =================================================
-                 CLUE 1
-            ================================================== -->
+            <!-- ===============================================
+                 DEFINITIONS CONTAINER
+
+                 JavaScript will create the definition cards
+                 inside this container.
+            ================================================ -->
 
             <div
-              class="clue-editor"
-              data-clue-index="0"
-            >
+              id="definitionsContainer"
+              class="definitions-container"
+            ></div>
 
-              <div class="clue-editor-title">
 
-                <span>
-                  Definiția 1
-                </span>
-
-                <span class="clue-number">
-                  1
-                </span>
-
-              </div>
-
-
-              <div class="field-group">
-
-                <label for="clueText1">
-                  Definiție
-                </label>
-
-                <textarea
-                  id="clueText1"
-                  class="clue-text"
-                  rows="3"
-                  placeholder="Ex: Animal domestic care latră"
-                ></textarea>
-
-              </div>
-
-
-              <div class="field-group">
-
-                <label for="answer1">
-                  Răspuns
-                </label>
-
-                <input
-                  id="answer1"
-                  class="answer-input"
-                  type="text"
-                  placeholder="Ex: CÂINE"
-                  autocomplete="off"
-                >
-
-              </div>
-
-
-              <div class="field-group">
-
-                <label>
-                  Direcție
-                </label>
-
-                <div
-                  class="direction-selector"
-                  data-direction-group="0"
-                >
-
-                  <button
-                    type="button"
-                    class="direction-button"
-                    data-direction="up"
-                    title="Sus"
-                  >
-                    ↑
-                  </button>
-
-                  <button
-                    type="button"
-                    class="direction-button"
-                    data-direction="left"
-                    title="Stânga"
-                  >
-                    ←
-                  </button>
-
-                  <button
-                    type="button"
-                    class="direction-button active"
-                    data-direction="right"
-                    title="Dreapta"
-                  >
-                    →
-                  </button>
-
-                  <button
-                    type="button"
-                    class="direction-button"
-                    data-direction="down"
-                    title="Jos"
-                  >
-                    ↓
-                  </button>
-
-                </div>
-
-              </div>
-
-            </div>
-
-
-            <!-- =================================================
-                 CLUE 2
-            ================================================== -->
-
-            <div
-              class="clue-editor hidden"
-              data-clue-index="1"
-            >
-
-              <div class="clue-editor-title">
-
-                <span>
-                  Definiția 2
-                </span>
-
-                <span class="clue-number">
-                  2
-                </span>
-
-              </div>
-
-
-              <div class="field-group">
-
-                <label for="clueText2">
-                  Definiție
-                </label>
-
-                <textarea
-                  id="clueText2"
-                  class="clue-text"
-                  rows="3"
-                  placeholder="Scrie a doua definiție"
-                ></textarea>
-
-              </div>
-
-
-              <div class="field-group">
-
-                <label for="answer2">
-                  Răspuns
-                </label>
-
-                <input
-                  id="answer2"
-                  class="answer-input"
-                  type="text"
-                  placeholder="RĂSPUNS"
-                  autocomplete="off"
-                >
-
-              </div>
-
-
-              <div class="field-group">
-
-                <label>
-                  Direcție
-                </label>
-
-                <div
-                  class="direction-selector"
-                  data-direction-group="1"
-                >
-
-                  <button
-                    type="button"
-                    class="direction-button"
-                    data-direction="up"
-                  >
-                    ↑
-                  </button>
-
-                  <button
-                    type="button"
-                    class="direction-button"
-                    data-direction="left"
-                  >
-                    ←
-                  </button>
-
-                  <button
-                    type="button"
-                    class="direction-button"
-                    data-direction="right"
-                  >
-                    →
-                  </button>
-
-                  <button
-                    type="button"
-                    class="direction-button active"
-                    data-direction="down"
-                  >
-                    ↓
-                  </button>
-
-                </div>
-
-              </div>
-
-            </div>
-
-
-            <!-- =================================================
-                 CLUE 3
-            ================================================== -->
-
-            <div
-              class="clue-editor hidden"
-              data-clue-index="2"
-            >
-
-              <div class="clue-editor-title">
-
-                <span>
-                  Definiția 3
-                </span>
-
-                <span class="clue-number">
-                  3
-                </span>
-
-              </div>
-
-
-              <div class="field-group">
-
-                <label for="clueText3">
-                  Definiție
-                </label>
-
-                <textarea
-                  id="clueText3"
-                  class="clue-text"
-                  rows="3"
-                  placeholder="Scrie a treia definiție"
-                ></textarea>
-
-              </div>
-
-
-              <div class="field-group">
-
-                <label for="answer3">
-                  Răspuns
-                </label>
-
-                <input
-                  id="answer3"
-                  class="answer-input"
-                  type="text"
-                  placeholder="RĂSPUNS"
-                  autocomplete="off"
-                >
-
-              </div>
-
-
-              <div class="field-group">
-
-                <label>
-                  Direcție
-                </label>
-
-                <div
-                  class="direction-selector"
-                  data-direction-group="2"
-                >
-
-                  <button
-                    type="button"
-                    class="direction-button"
-                    data-direction="up"
-                  >
-                    ↑
-                  </button>
-
-                  <button
-                    type="button"
-                    class="direction-button active"
-                    data-direction="left"
-                  >
-                    ←
-                  </button>
-
-                  <button
-                    type="button"
-                    class="direction-button"
-                    data-direction="right"
-                  >
-                    →
-                  </button>
-
-                  <button
-                    type="button"
-                    class="direction-button"
-                    data-direction="down"
-                  >
-                    ↓
-                  </button>
-
-                </div>
-
-              </div>
-
-            </div>
-
-
-            <!-- PLACE CLUES -->
+            <!-- ===============================================
+                 APPLY DEFINITIONS
+            ================================================ -->
 
             <div class="editor-actions">
 
               <button
-                id="placeCluesBtn"
+                id="applyDefinitionsBtn"
                 class="primary-button full-width"
                 type="button"
               >
-                Plasează răspunsul
+                Aplică definițiile și răspunsurile
               </button>
 
             </div>
@@ -791,7 +563,9 @@
           </div>
 
 
-          <!-- DELETE / CLEAR CELL -->
+          <!-- =================================================
+               CLEAR CELL
+          ================================================== -->
 
           <div class="editor-footer">
 
@@ -821,7 +595,10 @@
       class="preview-view hidden"
     >
 
-      <div class="preview-page">
+      <div
+        id="previewPage"
+        class="preview-page"
+      >
 
         <div class="print-header">
 
@@ -836,12 +613,29 @@
         </div>
 
 
-        <div class="preview-grid-wrapper">
+        <!--
+          The complete grid is kept inside one wrapper.
+
+          During printing/PDF export JavaScript can scale this
+          wrapper uniformly rather than changing individual cell
+          dimensions.
+        -->
+
+        <div
+          id="printGridArea"
+          class="print-grid-area"
+        >
 
           <div
-            id="previewGrid"
-            class="crossword-grid preview-grid"
+            id="previewGridScale"
+            class="preview-grid-scale"
           >
+
+            <div
+              id="previewGrid"
+              class="crossword-grid preview-grid"
+            ></div>
+
           </div>
 
         </div>
@@ -863,18 +657,21 @@
       <div class="validation-header">
 
         <div>
+
           <span class="eyebrow">
             VERIFICARE
           </span>
 
           <h2>Rezultatul verificării</h2>
+
         </div>
+
 
         <button
           id="closeValidationBtn"
           class="icon-button"
           type="button"
-          aria-label="Închide"
+          aria-label="Închide verificarea"
         >
           ×
         </button>
@@ -885,15 +682,13 @@
       <div
         id="validationSummary"
         class="validation-summary"
-      >
-      </div>
+      ></div>
 
 
       <div
         id="validationIssues"
         class="validation-issues"
-      >
-      </div>
+      ></div>
 
     </section>
 
@@ -901,7 +696,401 @@
 
 
   <!-- =========================================================
-       TOAST / MESSAGE
+       DEFINITION CARD TEMPLATE
+
+       A definition is now the parent object.
+
+       Definition
+          ├── text OR image
+          ├── Answer 1 + direction + special
+          ├── Answer 2 + direction + special
+          └── Answer 3 + direction + special
+
+       Reordering the definition card therefore moves all its
+       answers with it.
+  ========================================================== -->
+
+  <template id="definitionTemplate">
+
+    <article
+      class="definition-card"
+      data-definition-id=""
+    >
+
+
+      <!-- =====================================================
+           DEFINITION HEADER / REORDER
+      ====================================================== -->
+
+      <div class="definition-card-header">
+
+        <div class="definition-drag-area">
+
+          <span
+            class="drag-handle"
+            title="Reordonează definiția"
+            aria-hidden="true"
+          >
+            ⋮⋮
+          </span>
+
+
+          <div>
+
+            <span class="definition-position-label">
+              Definiția
+            </span>
+
+            <strong class="definition-position-number">
+              1
+            </strong>
+
+          </div>
+
+        </div>
+
+
+        <div class="definition-order-actions">
+
+          <button
+            class="small-icon-button move-definition-up"
+            type="button"
+            title="Mută definiția mai sus"
+            aria-label="Mută definiția mai sus"
+          >
+            ↑
+          </button>
+
+
+          <button
+            class="small-icon-button move-definition-down"
+            type="button"
+            title="Mută definiția mai jos"
+            aria-label="Mută definiția mai jos"
+          >
+            ↓
+          </button>
+
+
+          <button
+            class="small-icon-button danger-icon remove-definition"
+            type="button"
+            title="Șterge definiția"
+            aria-label="Șterge definiția"
+          >
+            ×
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <!-- =====================================================
+           DEFINITION TYPE
+      ====================================================== -->
+
+      <div class="definition-content">
+
+        <label class="section-label">
+          Tip definiție
+        </label>
+
+
+        <div class="definition-type-selector">
+
+          <button
+            class="definition-type-button active"
+            data-definition-type="text"
+            type="button"
+          >
+            Text
+          </button>
+
+
+          <button
+            class="definition-type-button"
+            data-definition-type="image"
+            type="button"
+          >
+            Imagine
+          </button>
+
+        </div>
+
+
+        <!-- ===================================================
+             TEXT DEFINITION
+        ==================================================== -->
+
+        <div class="definition-text-panel">
+
+          <label>
+            Definiție
+          </label>
+
+          <textarea
+            class="definition-text-input"
+            rows="3"
+            maxlength="300"
+            placeholder="Scrie definiția"
+          ></textarea>
+
+
+          <p class="field-help">
+            Textul se va adapta automat la dimensiunea
+            căsuței fără a despărți cuvintele.
+          </p>
+
+        </div>
+
+
+        <!-- ===================================================
+             IMAGE DEFINITION
+        ==================================================== -->
+
+        <div class="definition-image-panel hidden">
+
+          <label>
+            Imagine definiție
+          </label>
+
+
+          <label class="image-upload-control">
+
+            <input
+              class="definition-image-input"
+              type="file"
+              accept="image/png,image/jpeg,image/webp,image/gif"
+            >
+
+            <span class="image-upload-button">
+              Alege imagine
+            </span>
+
+          </label>
+
+
+          <div class="image-preview-area hidden">
+
+            <img
+              class="definition-image-preview"
+              src=""
+              alt="Previzualizare definiție"
+            >
+
+
+            <button
+              class="remove-image-button"
+              type="button"
+            >
+              Elimină imaginea
+            </button>
+
+          </div>
+
+
+          <p class="field-help">
+            Imaginea rămâne color și este păstrată proporțional
+            în căsuța definiției.
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <!-- =====================================================
+           ANSWERS
+      ====================================================== -->
+
+      <div class="definition-answers-section">
+
+        <div class="answers-heading">
+
+          <div>
+
+            <label class="section-label">
+              Răspunsuri pentru această definiție
+            </label>
+
+            <p class="field-help">
+              Poți adăuga până la 3 răspunsuri, fiecare cu
+              propria direcție.
+            </p>
+
+          </div>
+
+
+          <button
+            class="add-answer-button secondary-button"
+            type="button"
+          >
+            + Răspuns
+          </button>
+
+        </div>
+
+
+        <div class="answers-container"></div>
+
+      </div>
+
+    </article>
+
+  </template>
+
+
+  <!-- =========================================================
+       ANSWER TEMPLATE
+
+       Each answer belongs to its parent definition.
+       Moving the definition therefore automatically moves this
+       entire answer configuration with it.
+  ========================================================== -->
+
+  <template id="answerTemplate">
+
+    <div
+      class="answer-card"
+      data-answer-id=""
+    >
+
+      <div class="answer-card-header">
+
+        <strong class="answer-number">
+          Răspuns 1
+        </strong>
+
+
+        <button
+          class="remove-answer-button"
+          type="button"
+          title="Șterge răspunsul"
+          aria-label="Șterge răspunsul"
+        >
+          ×
+        </button>
+
+      </div>
+
+
+      <!-- =====================================================
+           ANSWER WORD
+      ====================================================== -->
+
+      <div class="field-group">
+
+        <label>
+          Cuvânt
+        </label>
+
+        <input
+          class="answer-word-input"
+          type="text"
+          maxlength="60"
+          placeholder="RĂSPUNS"
+          autocomplete="off"
+        >
+
+      </div>
+
+
+      <!-- =====================================================
+           DIRECTION
+      ====================================================== -->
+
+      <div class="field-group">
+
+        <label>
+          Direcție
+        </label>
+
+
+        <div class="direction-selector">
+
+          <button
+            type="button"
+            class="direction-button"
+            data-direction="up"
+            title="Sus"
+            aria-label="Sus"
+          >
+            ↑
+          </button>
+
+
+          <button
+            type="button"
+            class="direction-button"
+            data-direction="left"
+            title="Stânga"
+            aria-label="Stânga"
+          >
+            ←
+          </button>
+
+
+          <button
+            type="button"
+            class="direction-button active"
+            data-direction="right"
+            title="Dreapta"
+            aria-label="Dreapta"
+          >
+            →
+          </button>
+
+
+          <button
+            type="button"
+            class="direction-button"
+            data-direction="down"
+            title="Jos"
+            aria-label="Jos"
+          >
+            ↓
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <!-- =====================================================
+           SPECIAL WORD
+      ====================================================== -->
+
+      <label class="special-word-control">
+
+        <input
+          class="special-word-checkbox"
+          type="checkbox"
+        >
+
+
+        <span class="special-checkbox-visual"></span>
+
+
+        <span class="special-word-text">
+
+          <strong>Cuvânt special</strong>
+
+          <small>
+            Evidențiază răspunsul cu galben.
+          </small>
+
+        </span>
+
+      </label>
+
+    </div>
+
+  </template>
+
+
+  <!-- =========================================================
+       TOAST
   ========================================================== -->
 
   <div
@@ -909,8 +1098,7 @@
     class="toast"
     role="status"
     aria-live="polite"
-  >
-  </div>
+  ></div>
 
 
   <!-- =========================================================
