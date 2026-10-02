@@ -31,14 +31,14 @@ const state = {
 /* ============================================================
    ROUTES
 
-   IMPORTANT
-
    "entry" = side of clue cell used by arrow / first answer cell
 
    "travel" = direction in which the answer continues.
 
    Straight:
    right
+   left
+   up
    down
 
    Bent:
@@ -66,6 +66,20 @@ const ROUTES = {
     travel: "right",
     bent: false,
     label: "dreapta"
+  },
+
+  left: {
+    entry: "left",
+    travel: "left",
+    bent: false,
+    label: "stânga"
+  },
+
+  up: {
+    entry: "up",
+    travel: "up",
+    bent: false,
+    label: "sus"
   },
 
   down: {
@@ -720,7 +734,7 @@ function renderCellContent(
 
 
   /* ----------------------------------------------------------
-     BLOCKED
+     BLOCKED CELL
   ---------------------------------------------------------- */
 
   if (
@@ -737,7 +751,7 @@ function renderCellContent(
 
 
   /* ----------------------------------------------------------
-     CLUE
+     CLUE CELL
   ---------------------------------------------------------- */
 
   if (
@@ -759,6 +773,7 @@ function renderCellContent(
     const definitions =
       cell.definitions || [];
 
+
     definitions.forEach(
       (
         definition,
@@ -778,7 +793,7 @@ function renderCellContent(
 
 
         /* -----------------------------------------------
-           IMAGE
+           IMAGE DEFINITION
         ------------------------------------------------ */
 
         if (
@@ -813,7 +828,7 @@ function renderCellContent(
 
 
         /* -----------------------------------------------
-           TEXT
+           TEXT DEFINITION
         ------------------------------------------------ */
 
         else {
@@ -829,6 +844,16 @@ function renderCellContent(
           text.textContent =
             definition.text || "";
 
+          /*
+             We keep the definition index on the text element.
+
+             This is useful when synchronising the fitted
+             Creator font size with Preview / PDF.
+          */
+
+          text.dataset.definitionIndex =
+            definitionIndex;
+
           part.appendChild(
             text
           );
@@ -839,14 +864,11 @@ function renderCellContent(
         /*
            IMPORTANT:
 
-           Arrows are NOT inserted inside clue-part.
+           Arrows are not part of clue text layout.
 
-           This means:
-           - clue text fitting ignores arrows
-           - arrows do not consume clue space
-           - arrows can overlap the clue boundary
-
-           They are attached separately to clue-cell.
+           They are rendered in their own absolute overlay,
+           so they cannot reduce the available space for
+           definition text.
         */
 
         wrapper.appendChild(
@@ -872,6 +894,7 @@ function renderCellContent(
 
     arrowLayer.className =
       "clue-arrow-layer";
+
 
     definitions.forEach(
       (
@@ -914,6 +937,7 @@ function renderCellContent(
               answer.direction
             );
 
+
             const arrow =
               createClueArrow(
                 answer.direction,
@@ -931,6 +955,7 @@ function renderCellContent(
       }
     );
 
+
     element.appendChild(
       arrowLayer
     );
@@ -942,8 +967,6 @@ function renderCellContent(
 
 /* ============================================================
    CREATE CLUE ARROW
-
-   CSS draws the actual lines and arrowhead.
 ============================================================ */
 
 function createClueArrow(
@@ -979,12 +1002,33 @@ function createClueArrow(
   arrow.dataset.definitionCount =
     definitionCount;
 
-  /*
-     Position the arrow against the correct
-     definition subsection.
 
-     CSS reads these custom properties.
+  /*
+     Store both the original values and a ready-to-use
+     percentage.
+
+     Example:
+     1 definition  -> 50%
+     2 definitions -> 25%, 75%
+     3 definitions -> 16.666%, 50%, 83.333%
+
+     This avoids relying entirely on complicated CSS
+     multiplication when positioning arrows.
   */
+
+  const definitionPosition =
+    (
+      (
+        definitionIndex +
+        0.5
+      ) /
+      Math.max(
+        definitionCount,
+        1
+      )
+    ) *
+    100;
+
 
   arrow.style.setProperty(
     "--definition-index",
@@ -995,6 +1039,12 @@ function createClueArrow(
     "--definition-count",
     definitionCount
   );
+
+  arrow.style.setProperty(
+    "--definition-position",
+    `${definitionPosition}%`
+  );
+
 
   const lineA =
     document.createElement(
@@ -1010,7 +1060,7 @@ function createClueArrow(
 
 
   /*
-     Bent arrows use a second segment.
+     Bent arrows use two line segments.
   */
 
   if (route.bent) {
@@ -1041,6 +1091,7 @@ function createClueArrow(
   arrow.appendChild(
     head
   );
+
 
   return arrow;
 
@@ -1313,6 +1364,7 @@ function changeSelectedCellType(
     return;
   }
 
+
   removeWordsTouchingCell(
     row,
     col
@@ -1384,6 +1436,7 @@ function changeSelectedCellType(
 
   }
 
+
   setActiveCellType(
     type
   );
@@ -1415,6 +1468,7 @@ manualLetter.addEventListener(
 
     }
 
+
     const value =
       manualLetter.value
         .toLocaleUpperCase(
@@ -1424,6 +1478,7 @@ manualLetter.addEventListener(
           0,
           1
         );
+
 
     manualLetter.value =
       value;
@@ -1461,6 +1516,7 @@ function renderDefinitionEditor(
 
   }
 
+
   cell.definitions.forEach(
     (
       definition,
@@ -1474,6 +1530,7 @@ function renderDefinitionEditor(
             true
           );
 
+
       const card =
         fragment.querySelector(
           ".definition-card"
@@ -1482,6 +1539,7 @@ function renderDefinitionEditor(
       card.dataset.definitionId =
         definition.id;
 
+
       const number =
         card.querySelector(
           ".definition-position-number"
@@ -1489,6 +1547,7 @@ function renderDefinitionEditor(
 
       number.textContent =
         index + 1;
+
 
       setupDefinitionType(
         card,
@@ -1520,12 +1579,14 @@ function renderDefinitionEditor(
         definition.id
       );
 
+
       definitionsContainer.appendChild(
         fragment
       );
 
     }
   );
+
 
   updateDefinitionButtons();
 
@@ -1571,6 +1632,7 @@ function setupDefinitionType(
       }
     );
 
+
     textPanel.classList.toggle(
       "hidden",
       definition.type !==
@@ -1606,6 +1668,7 @@ function setupDefinitionType(
     }
   );
 
+
   updatePanels();
 
 }
@@ -1627,6 +1690,7 @@ function setupDefinitionText(
 
   input.value =
     definition.text || "";
+
 
   input.addEventListener(
     "input",
@@ -1714,6 +1778,7 @@ function setupDefinitionImage(
         return;
       }
 
+
       if (
         !file.type.startsWith(
           "image/"
@@ -1730,8 +1795,10 @@ function setupDefinitionImage(
 
       }
 
+
       const reader =
         new FileReader();
+
 
       reader.onload =
         () => {
@@ -1748,6 +1815,7 @@ function setupDefinitionImage(
 
         };
 
+
       reader.onerror =
         () => {
 
@@ -1756,6 +1824,7 @@ function setupDefinitionImage(
           );
 
         };
+
 
       reader.readAsDataURL(
         file
@@ -1782,6 +1851,7 @@ function setupDefinitionImage(
     }
   );
 
+
   updatePreview();
 
 }
@@ -1806,6 +1876,7 @@ function setupDefinitionAnswers(
       ".add-answer-button"
     );
 
+
   renderAnswersIntoCard(
     container,
     definition
@@ -1829,19 +1900,35 @@ function setupDefinitionAnswers(
 
       }
 
+
+      /*
+         ALL 12 ROUTES
+
+         Straight directions are deliberately first so
+         new answers receive a simple route before one
+         of the bent routes is selected.
+      */
+
       const availableRoutes =
         [
           "right",
+          "left",
+          "up",
           "down",
+
           "right-up",
           "right-down",
+
           "left-up",
           "left-down",
+
           "up-right",
           "up-left",
+
           "down-right",
           "down-left"
         ];
+
 
       const used =
         new Set(
@@ -1851,6 +1938,7 @@ function setupDefinitionAnswers(
           )
         );
 
+
       const nextRoute =
         availableRoutes.find(
           (route) =>
@@ -1858,11 +1946,13 @@ function setupDefinitionAnswers(
         ) ||
         "right";
 
+
       definition.answers.push(
         createAnswer(
           nextRoute
         )
       );
+
 
       renderDefinitionEditor(
         getSelectedCell()
@@ -1886,6 +1976,7 @@ function renderAnswersIntoCard(
   container.innerHTML =
     "";
 
+
   definition.answers.forEach(
     (
       answer,
@@ -1893,10 +1984,11 @@ function renderAnswersIntoCard(
     ) => {
 
       /*
-         Compatibility protection:
+         Compatibility protection.
 
-         If an old grid somehow contains "left"
-         or "up", move it to a supported route.
+         Because ROUTES now contains all four straight
+         directions, existing LEFT and UP answers are
+         valid and will no longer be converted to RIGHT.
       */
 
       if (
@@ -1910,12 +2002,14 @@ function renderAnswersIntoCard(
 
       }
 
+
       const fragment =
         answerTemplate
           .content
           .cloneNode(
             true
           );
+
 
       const card =
         fragment.querySelector(
@@ -1924,6 +2018,7 @@ function renderAnswersIntoCard(
 
       card.dataset.answerId =
         answer.id;
+
 
       const number =
         card.querySelector(
@@ -1945,6 +2040,7 @@ function renderAnswersIntoCard(
 
       wordInput.value =
         answer.word || "";
+
 
       wordInput.addEventListener(
         "input",
@@ -1971,6 +2067,7 @@ function renderAnswersIntoCard(
           ".direction-button"
         );
 
+
       directionButtons.forEach(
         (button) => {
 
@@ -1979,6 +2076,7 @@ function renderAnswersIntoCard(
             button.dataset.direction ===
               answer.direction
           );
+
 
           button.addEventListener(
             "click",
@@ -1994,12 +2092,15 @@ function renderAnswersIntoCard(
                 }
               );
 
+
               button.classList.add(
                 "active"
               );
 
+
               answer.direction =
                 button.dataset.direction;
+
 
               renderGrid();
 
@@ -2011,7 +2112,7 @@ function renderAnswersIntoCard(
 
 
       /* -----------------------------------------------
-         SPECIAL
+         SPECIAL WORD
       ------------------------------------------------ */
 
       const specialCheckbox =
@@ -2019,9 +2120,11 @@ function renderAnswersIntoCard(
           ".special-word-checkbox"
         );
 
+
       specialCheckbox.checked =
         answer.special ===
         true;
+
 
       specialCheckbox.addEventListener(
         "change",
@@ -2043,6 +2146,7 @@ function renderAnswersIntoCard(
           ".remove-answer-button"
         );
 
+
       removeButton.addEventListener(
         "click",
         () => {
@@ -2060,12 +2164,14 @@ function renderAnswersIntoCard(
 
           }
 
+
           definition.answers =
             definition.answers.filter(
               (item) =>
                 item.id !==
                 answer.id
             );
+
 
           renderDefinitionEditor(
             getSelectedCell()
@@ -2075,6 +2181,7 @@ function renderAnswersIntoCard(
 
         }
       );
+
 
       container.appendChild(
         fragment
@@ -2097,6 +2204,7 @@ addDefinitionBtn.addEventListener(
     const cell =
       getSelectedCell();
 
+
     if (
       !cell ||
       cell.type !==
@@ -2106,6 +2214,7 @@ addDefinitionBtn.addEventListener(
       return;
 
     }
+
 
     if (
       cell.definitions.length >=
@@ -2120,9 +2229,11 @@ addDefinitionBtn.addEventListener(
 
     }
 
+
     cell.definitions.push(
       createDefinition()
     );
+
 
     renderDefinitionEditor(
       cell
@@ -2153,6 +2264,7 @@ function setupDefinitionReordering(
       ".move-definition-down"
     );
 
+
   upButton.addEventListener(
     "click",
     () => {
@@ -2164,6 +2276,7 @@ function setupDefinitionReordering(
 
     }
   );
+
 
   downButton.addEventListener(
     "click",
@@ -2188,6 +2301,7 @@ function moveDefinition(
   const cell =
     getSelectedCell();
 
+
   if (
     !cell ||
     cell.type !==
@@ -2198,12 +2312,14 @@ function moveDefinition(
 
   }
 
+
   const index =
     cell.definitions.findIndex(
       (definition) =>
         definition.id ===
         definitionId
     );
+
 
   if (
     index === -1
@@ -2213,8 +2329,10 @@ function moveDefinition(
 
   }
 
+
   const newIndex =
     index + offset;
+
 
   if (
     newIndex < 0 ||
@@ -2226,11 +2344,13 @@ function moveDefinition(
 
   }
 
+
   const [definition] =
     cell.definitions.splice(
       index,
       1
     );
+
 
   cell.definitions.splice(
     newIndex,
@@ -2238,9 +2358,11 @@ function moveDefinition(
     definition
   );
 
+
   /*
-     The whole definition object moves,
-     including every linked answer.
+     The complete definition object moves,
+     including all answers, directions,
+     special-word settings and image data.
   */
 
   renderDefinitionEditor(
@@ -2266,12 +2388,14 @@ function setupDefinitionRemoval(
       ".remove-definition"
     );
 
+
   removeButton.addEventListener(
     "click",
     () => {
 
       const cell =
         getSelectedCell();
+
 
       if (
         !cell ||
@@ -2282,6 +2406,7 @@ function setupDefinitionRemoval(
         return;
 
       }
+
 
       if (
         cell.definitions.length <=
@@ -2296,12 +2421,14 @@ function setupDefinitionRemoval(
 
       }
 
+
       cell.definitions =
         cell.definitions.filter(
           (definition) =>
             definition.id !==
             definitionId
         );
+
 
       renderDefinitionEditor(
         cell
@@ -2329,6 +2456,7 @@ function updateDefinitionButtons() {
         )
     ];
 
+
   cards.forEach(
     (
       card,
@@ -2345,6 +2473,7 @@ function updateDefinitionButtons() {
           ".move-definition-down"
         );
 
+
       up.disabled =
         index === 0;
 
@@ -2355,6 +2484,7 @@ function updateDefinitionButtons() {
     }
   );
 
+
   addDefinitionBtn.disabled =
     cards.length >= 3;
 
@@ -2362,6 +2492,9 @@ function updateDefinitionButtons() {
 
 
 /* ============================================================
+   END OF PART 1
+   PART 2 CONTINUES WITH APPLY DEFINITIONS + WORD PLACEMENT
+============================================================ *//* ============================================================
    APPLY DEFINITIONS
 ============================================================ */
 
@@ -2385,6 +2518,7 @@ function applySelectedDefinitions() {
       col
     );
 
+
   if (
     !cell ||
     cell.type !==
@@ -2394,6 +2528,7 @@ function applySelectedDefinitions() {
     return;
 
   }
+
 
   if (
     !cell.definitions ||
@@ -2488,6 +2623,7 @@ function applySelectedDefinitions() {
           answerIndex
         ];
 
+
       answer.word =
         normalizeAnswer(
           answer.word
@@ -2507,6 +2643,24 @@ function applySelectedDefinitions() {
       }
 
 
+      /*
+         All 12 directions are valid now:
+
+         right
+         left
+         up
+         down
+
+         right-up
+         right-down
+         left-up
+         left-down
+         up-right
+         up-left
+         down-right
+         down-left
+      */
+
       if (
         !ROUTES[
           answer.direction
@@ -2522,6 +2676,19 @@ function applySelectedDefinitions() {
       }
 
 
+      /*
+         Prevent two answers belonging to the SAME
+         definition from using the exact same route.
+
+         This still allows, for example:
+
+         right
+         right-up
+         right-down
+
+         because these are three different routes.
+      */
+
       if (
         directionSet.has(
           answer.direction
@@ -2536,6 +2703,7 @@ function applySelectedDefinitions() {
 
       }
 
+
       directionSet.add(
         answer.direction
       );
@@ -2545,9 +2713,23 @@ function applySelectedDefinitions() {
   }
 
 
+  /*
+     Create a complete backup before changing existing
+     word placements.
+
+     If any new answer cannot be placed, the old grid
+     is restored.
+  */
+
   const backup =
     createGridBackup();
 
+
+  /*
+     Remove only words belonging to this clue cell.
+
+     Other clue cells and their words remain untouched.
+  */
 
   removeWordsOwnedByClueCell(
     row,
@@ -2575,6 +2757,7 @@ function applySelectedDefinitions() {
         definitionIndex
       ];
 
+
     for (
       let answerIndex = 0;
       answerIndex <
@@ -2586,6 +2769,7 @@ function applySelectedDefinitions() {
         definition.answers[
           answerIndex
         ];
+
 
       const placement =
         calculatePlacement(
@@ -2631,6 +2815,15 @@ function applySelectedDefinitions() {
       };
 
 
+      /*
+         Compare the new answer with the other new
+         answers being placed from this clue cell.
+
+         Matching letters may intersect.
+
+         Different letters in the same cell are rejected.
+      */
+
       for (
         const previous
         of placements
@@ -2641,6 +2834,7 @@ function applySelectedDefinitions() {
             previous,
             newPlacement
           );
+
 
         if (
           conflict
@@ -2660,6 +2854,7 @@ function applySelectedDefinitions() {
 
       }
 
+
       placements.push(
         newPlacement
       );
@@ -2670,7 +2865,7 @@ function applySelectedDefinitions() {
 
 
   /* ----------------------------------------------------------
-     COMMIT
+     COMMIT ALL PLACEMENTS
   ---------------------------------------------------------- */
 
   placements.forEach(
@@ -2678,6 +2873,7 @@ function applySelectedDefinitions() {
 
       const wordId =
         state.nextWordId++;
+
 
       placement.answer.wordId =
         wordId;
@@ -2746,8 +2942,10 @@ function applySelectedDefinitions() {
               position.col
             );
 
+
           targetCell.type =
             "letter";
+
 
           targetCell.letters.push({
 
@@ -2778,6 +2976,7 @@ function applySelectedDefinitions() {
 
   updateStatistics();
 
+
   showToast(
     "Definițiile și răspunsurile au fost aplicate."
   );
@@ -2788,12 +2987,19 @@ function applySelectedDefinitions() {
 /* ============================================================
    CALCULATE PLACEMENT
 
-   STRAIGHT RIGHT:
+   ALL STRAIGHT DIRECTIONS
+
+   RIGHT:
 
    [CLUE][1][2][3][4]
 
 
-   STRAIGHT DOWN:
+   LEFT:
+
+   [4][3][2][1][CLUE]
+
+
+   DOWN:
 
    [CLUE]
      [1]
@@ -2801,12 +3007,20 @@ function applySelectedDefinitions() {
      [3]
 
 
+   UP:
+
+     [3]
+     [2]
+     [1]
+   [CLUE]
+
+
    BENT EXAMPLE: RIGHT → DOWN
 
    [CLUE][1]
-         [2]
-         [3]
-         [4]
+          [2]
+          [3]
+          [4]
 
 
    BENT EXAMPLE: DOWN → RIGHT
@@ -2819,6 +3033,8 @@ function applySelectedDefinitions() {
 
    - first letter is adjacent to clue on ENTRY side
    - remaining letters move in TRAVEL direction
+
+   The same engine works for all 12 routes.
 ============================================================ */
 
 function calculatePlacement(
@@ -2832,6 +3048,7 @@ function calculatePlacement(
     ROUTES[
       routeName
     ];
+
 
   if (
     !route
@@ -2899,6 +3116,10 @@ function calculatePlacement(
     }
 
 
+    /* --------------------------------------------------------
+       OUTSIDE GRID
+    -------------------------------------------------------- */
+
     if (
       row < 0 ||
       row >= state.rows ||
@@ -2925,6 +3146,10 @@ function calculatePlacement(
       );
 
 
+    /* --------------------------------------------------------
+       CLUE CELL COLLISION
+    -------------------------------------------------------- */
+
     if (
       target.type ===
         "clue"
@@ -2941,6 +3166,10 @@ function calculatePlacement(
 
     }
 
+
+    /* --------------------------------------------------------
+       BLOCKED CELL COLLISION
+    -------------------------------------------------------- */
 
     if (
       target.type ===
@@ -2962,6 +3191,10 @@ function calculatePlacement(
     const requiredLetter =
       answer[index];
 
+
+    /* --------------------------------------------------------
+       EXISTING LINKED LETTER
+    -------------------------------------------------------- */
 
     if (
       target.letters &&
@@ -2998,6 +3231,10 @@ function calculatePlacement(
 
     }
 
+
+    /* --------------------------------------------------------
+       MANUAL LETTER
+    -------------------------------------------------------- */
 
     if (
       target.manualLetter &&
@@ -3119,6 +3356,7 @@ function compareNewPlacements(
 
   }
 
+
   return null;
 
 }
@@ -3139,6 +3377,7 @@ function removeWordById(
         wordId
     );
 
+
   if (!word) {
     return;
   }
@@ -3153,9 +3392,11 @@ function removeWordById(
           position.col
         );
 
+
       if (!cell) {
         return;
       }
+
 
       cell.letters =
         cell.letters.filter(
@@ -3256,6 +3497,7 @@ function removeWordsTouchingCell(
       row,
       col
     );
+
 
   if (!cell) {
     return;
@@ -3360,12 +3602,15 @@ function restoreGridBackup(
   state.nextWordId =
     backup.nextWordId;
 
+
   renderGrid();
+
 
   openEditor(
     state.selectedRow,
     state.selectedCol
   );
+
 
   updateStatistics();
 
@@ -3505,11 +3750,10 @@ function countIntersections() {
       if (
         cell.type ===
           "letter" &&
-        cell.letters.length >
-          1 &&
-        !hasLetterConflict(
-          cell
-        )
+        Array.isArray(
+          cell.letters
+        ) &&
+        cell.letters.length > 1
       ) {
 
         count++;
@@ -3527,10 +3771,25 @@ function countIntersections() {
 
 
 /* ============================================================
-   COUNT CONFLICTS
+   COUNT SPECIAL WORDS
 ============================================================ */
 
-function countConflicts() {
+function countSpecialWords() {
+
+  return state.words.filter(
+    (word) =>
+      word.special ===
+      true
+  ).length;
+
+}
+
+
+/* ============================================================
+   COUNT CURRENT CONFLICTS
+============================================================ */
+
+function countCurrentConflicts() {
 
   let count = 0;
 
@@ -3568,21 +3827,6 @@ function countConflicts() {
 
 
 /* ============================================================
-   COUNT SPECIAL WORDS
-============================================================ */
-
-function countSpecialWords() {
-
-  return state.words.filter(
-    (word) =>
-      word.special ===
-      true
-  ).length;
-
-}
-
-
-/* ============================================================
    UPDATE STATISTICS
 ============================================================ */
 
@@ -3594,11 +3838,11 @@ function updateStatistics() {
   const intersections =
     countIntersections();
 
-  const conflicts =
-    countConflicts();
-
   const special =
     countSpecialWords();
+
+  const conflicts =
+    countCurrentConflicts();
 
 
   wordCount.textContent =
@@ -3607,59 +3851,44 @@ function updateStatistics() {
   intersectionCount.textContent =
     intersections;
 
-  conflictCount.textContent =
-    conflicts;
-
   specialWordCount.textContent =
     special;
 
-
-  statusIndicator.classList.remove(
-    "valid",
-    "invalid",
-    "warning",
-    "neutral"
-  );
+  conflictCount.textContent =
+    conflicts;
 
 
   if (
     conflicts > 0
   ) {
 
-    statusIndicator.classList.add(
-      "invalid"
-    );
+    statusIndicator.className =
+      "status-indicator error";
 
     statusText.textContent =
-      conflicts === 1
-        ? "Există un conflict în grilă."
-        : `Există ${conflicts} conflicte în grilă.`;
+      "Grila conține conflicte.";
 
   }
-
 
   else if (
-    words === 0
+    words > 0
   ) {
 
-    statusIndicator.classList.add(
-      "neutral"
-    );
+    statusIndicator.className =
+      "status-indicator success";
 
     statusText.textContent =
-      "Grila este pregătită.";
+      "Grila nu are conflicte de litere.";
 
   }
-
 
   else {
 
-    statusIndicator.classList.add(
-      "valid"
-    );
+    statusIndicator.className =
+      "status-indicator neutral";
 
     statusText.textContent =
-      "Nu există conflicte de litere.";
+      "Grila este pregătită.";
 
   }
 
@@ -3667,80 +3896,65 @@ function updateStatistics() {
 
 
 /* ============================================================
-   NON-DESTRUCTIVE RESIZE
+   NON-DESTRUCTIVE GRID RESIZE
 ============================================================ */
 
 resizeGridBtn.addEventListener(
   "click",
-  () => {
-
-    const newRows =
-      Number(
-        gridRowsInput.value
-      );
-
-    const newCols =
-      Number(
-        gridColsInput.value
-      );
-
-
-    if (
-      !Number.isInteger(
-        newRows
-      ) ||
-      !Number.isInteger(
-        newCols
-      ) ||
-      newRows < 5 ||
-      newRows > 30 ||
-      newCols < 5 ||
-      newCols > 30
-    ) {
-
-      showResizeIssues([
-        "Dimensiunea grilei trebuie să fie între 5 și 30 de rânduri și coloane."
-      ]);
-
-      return;
-
-    }
-
-
-    resizeGridPreservingContent(
-      newRows,
-      newCols
-    );
-
-  }
+  resizeGridNonDestructive
 );
 
 
-/* ============================================================
-   RESIZE PRESERVING CONTENT
-============================================================ */
+function resizeGridNonDestructive() {
 
-function resizeGridPreservingContent(
-  newRows,
-  newCols
-) {
+  const newRows =
+    Number(
+      gridRowsInput.value
+    );
 
-  const oldRows =
-    state.rows;
+  const newCols =
+    Number(
+      gridColsInput.value
+    );
 
-  const oldCols =
-    state.cols;
+
+  if (
+    !Number.isInteger(
+      newRows
+    ) ||
+    !Number.isInteger(
+      newCols
+    ) ||
+    newRows < 5 ||
+    newRows > 30 ||
+    newCols < 5 ||
+    newCols > 30
+  ) {
+
+    showToast(
+      "Dimensiunile grilei trebuie să fie între 5 și 30."
+    );
+
+    gridRowsInput.value =
+      state.rows;
+
+    gridColsInput.value =
+      state.cols;
+
+    return;
+
+  }
 
 
   if (
     newRows ===
-      oldRows &&
+      state.rows &&
     newCols ===
-      oldCols
+      state.cols
   ) {
 
     showToast(
-      "Grila are deja această dimensiune."
+      "Grila are deja aceste dimensiuni."
     );
 
     return;
@@ -3755,9 +3969,14 @@ function resizeGridPreservingContent(
     );
 
 
+  /*
+     IMPORTANT:
+     shrinking is cancelled completely if any content
+     would disappear.
+  */
+
   if (
-    issues.length >
-    0
+    issues.length > 0
   ) {
 
     gridRowsInput.value =
@@ -3766,8 +3985,15 @@ function resizeGridPreservingContent(
     gridColsInput.value =
       state.cols;
 
-    showResizeIssues(
-      issues
+
+    showValidationIssues(
+      issues,
+      "Redimensionarea a fost anulată pentru a proteja conținutul existent."
+    );
+
+
+    showToast(
+      "Grila nu a fost redimensionată deoarece unele editări ar fi șterse."
     );
 
     return;
@@ -3775,43 +4001,50 @@ function resizeGridPreservingContent(
   }
 
 
-  /* EXPAND COLUMNS */
+  const oldRows =
+    state.rows;
+
+  const oldCols =
+    state.cols;
+
+
+  /* ----------------------------------------------------------
+     ADD NEW COLUMNS TO EXISTING ROWS
+  ---------------------------------------------------------- */
 
   if (
     newCols >
-    oldCols
+      oldCols
   ) {
 
-    for (
-      let row = 0;
-      row < oldRows;
-      row++
-    ) {
+    state.grid.forEach(
+      (rowArray) => {
 
-      for (
-        let col = oldCols;
-        col < newCols;
-        col++
-      ) {
+        for (
+          let col = oldCols;
+          col < newCols;
+          col++
+        ) {
 
-        state.grid[
-          row
-        ].push(
-          createEmptyCell()
-        );
+          rowArray.push(
+            createEmptyCell()
+          );
+
+        }
 
       }
-
-    }
+    );
 
   }
 
 
-  /* ADD ROWS */
+  /* ----------------------------------------------------------
+     ADD NEW ROWS
+  ---------------------------------------------------------- */
 
   if (
     newRows >
-    oldRows
+      oldRows
   ) {
 
     for (
@@ -3820,8 +4053,9 @@ function resizeGridPreservingContent(
       row++
     ) {
 
-      const newRow =
+      const rowArray =
         [];
+
 
       for (
         let col = 0;
@@ -3829,14 +4063,15 @@ function resizeGridPreservingContent(
         col++
       ) {
 
-        newRow.push(
+        rowArray.push(
           createEmptyCell()
         );
 
       }
 
+
       state.grid.push(
-        newRow
+        rowArray
       );
 
     }
@@ -3844,38 +4079,38 @@ function resizeGridPreservingContent(
   }
 
 
-  /* SHRINK ROWS */
+  /* ----------------------------------------------------------
+     SAFE COLUMN SHRINK
+  ---------------------------------------------------------- */
 
   if (
-    newRows <
-    oldRows
+    newCols <
+      oldCols
   ) {
 
-    state.grid.length =
-      newRows;
+    state.grid.forEach(
+      (rowArray) => {
+
+        rowArray.length =
+          newCols;
+
+      }
+    );
 
   }
 
 
-  /* SHRINK COLUMNS */
+  /* ----------------------------------------------------------
+     SAFE ROW SHRINK
+  ---------------------------------------------------------- */
 
   if (
-    newCols <
-    oldCols
+    newRows <
+      oldRows
   ) {
 
-    for (
-      let row = 0;
-      row < newRows;
-      row++
-    ) {
-
-      state.grid[
-        row
-      ].length =
-        newCols;
-
-    }
+    state.grid.length =
+      newRows;
 
   }
 
@@ -3887,10 +4122,13 @@ function resizeGridPreservingContent(
     newCols;
 
 
+  /*
+     If selected cell was in an empty region that was
+     safely removed, clear selection.
+  */
+
   if (
     state.selectedRow !==
-      null &&
-    state.selectedCol !==
       null &&
     (
       state.selectedRow >=
@@ -3911,22 +4149,15 @@ function resizeGridPreservingContent(
   }
 
 
-  gridRowsInput.value =
-    newRows;
-
-  gridColsInput.value =
-    newCols;
-
-
-  clearResizeValidation();
-
   renderGrid();
 
   updateStatistics();
 
+  hideValidationPanel();
+
 
   showToast(
-    `Grila a fost redimensionată la ${newRows} × ${newCols}. Conținutul existent a fost păstrat.`
+    `Grila a fost redimensionată la ${newRows} × ${newCols} fără a șterge editările existente.`
   );
 
 }
@@ -3944,9 +4175,10 @@ function findResizeConflicts(
   const issues =
     [];
 
-  const affectedCells =
-    [];
 
+  /*
+     Check every cell that would disappear.
+  */
 
   for (
     let row = 0;
@@ -3971,663 +4203,68 @@ function findResizeConflicts(
 
 
       const cell =
-        state.grid[
-          row
-        ][
-          col
-        ];
+        state.grid[row][col];
 
 
       if (
-        cellHasEditableContent(
-          cell
-        )
+        !cell
       ) {
 
-        affectedCells.push({
-          row,
-          col,
-          cell
-        });
+        continue;
 
       }
 
-    }
-
-  }
-
-
-  if (
-    affectedCells.length >
-    0
-  ) {
-
-    issues.push(
-      `Redimensionarea la ${newRows} × ${newCols} ar elimina ${affectedCells.length} căsuță${affectedCells.length === 1 ? "" : "e"} care conțin editări. Grila nu a fost modificată.`
-    );
-
-
-    affectedCells
-      .slice(
-        0,
-        10
-      )
-      .forEach(
-        ({
-          row,
-          col,
-          cell
-        }) => {
-
-          issues.push(
-            describeResizeConflict(
-              row,
-              col,
-              cell
-            )
-          );
-
-        }
-      );
-
-
-    if (
-      affectedCells.length >
-      10
-    ) {
-
-      issues.push(
-        `Mai există încă ${affectedCells.length - 10} căsuțe afectate.`
-      );
-
-    }
-
-  }
-
-
-  const affectedWords =
-    state.words.filter(
-      (word) =>
-
-        word.cells.some(
-          (position) =>
-
-            position.row >=
-              newRows ||
-
-            position.col >=
-              newCols
-
-        )
-
-    );
-
-
-  affectedWords.forEach(
-    (word) => {
-
-      const alreadyMentioned =
-        issues.some(
-          (message) =>
-
-            message.includes(
-              `„${word.answer}”`
-            )
-
-        );
-
-
-      if (
-        !alreadyMentioned
-      ) {
-
-        issues.push(
-          `Cuvântul „${word.answer}” ar ieși în afara noii grile.`
-        );
-
-      }
-
-    }
-  );
-
-
-  return issues;
-
-}
-
-
-/* ============================================================
-   CELL HAS EDITED CONTENT
-============================================================ */
-
-function cellHasEditableContent(
-  cell
-) {
-
-  if (!cell) {
-    return false;
-  }
-
-
-  if (
-    cell.type ===
-    "clue"
-  ) {
-
-    return true;
-
-  }
-
-
-  if (
-    cell.type ===
-    "blocked"
-  ) {
-
-    return true;
-
-  }
-
-
-  if (
-    cell.manualLetter
-  ) {
-
-    return true;
-
-  }
-
-
-  if (
-    Array.isArray(
-      cell.letters
-    ) &&
-    cell.letters.length >
-      0
-  ) {
-
-    return true;
-
-  }
-
-
-  return false;
-
-}
-
-
-/* ============================================================
-   DESCRIBE RESIZE CONFLICT
-============================================================ */
-
-function describeResizeConflict(
-  row,
-  col,
-  cell
-) {
-
-  const location =
-    `Rând ${row + 1}, coloana ${col + 1}`;
-
-
-  if (
-    cell.type ===
-      "clue"
-  ) {
-
-    const hasImage =
-      (
-        cell.definitions ||
-        []
-      ).some(
-        (definition) =>
-
-          definition.type ===
-            "image" &&
-          definition.imageData
-
-      );
-
-
-    if (
-      hasImage
-    ) {
-
-      return (
-        `${location}: conține o definiție cu imagine și nu poate fi eliminată automat.`
-      );
-
-    }
-
-
-    return (
-      `${location}: conține o definiție și nu poate fi eliminată automat.`
-    );
-
-  }
-
-
-  if (
-    cell.type ===
-      "blocked"
-  ) {
-
-    return (
-      `${location}: este o căsuță blocată creată manual.`
-    );
-
-  }
-
-
-  if (
-    cell.letters &&
-    cell.letters.length >
-      0
-  ) {
-
-    const wordNames =
-      cell.letters
-        .map(
-          (letter) => {
-
-            const word =
-              state.words.find(
-                (item) =>
-                  item.id ===
-                  letter.wordId
-              );
-
-            return word
-              ? word.answer
-              : null;
-
-          }
-        )
-        .filter(
-          Boolean
-        );
-
-
-    const uniqueWords =
-      [
-        ...new Set(
-          wordNames
-        )
-      ];
-
-
-    if (
-      uniqueWords.length >
-      0
-    ) {
-
-      return (
-        `${location}: face parte din ${uniqueWords.length === 1 ? "cuvântul" : "cuvintele"} „${uniqueWords.join("”, „")}”.`
-      );
-
-    }
-
-
-    return (
-      `${location}: conține o literă aparținând unui răspuns.`
-    );
-
-  }
-
-
-  if (
-    cell.manualLetter
-  ) {
-
-    return (
-      `${location}: conține litera manuală „${cell.manualLetter}”.`
-    );
-
-  }
-
-
-  return (
-    `${location}: conține editări.`
-  );
-
-}
-
-
-/* ============================================================
-   SHOW RESIZE ISSUES
-============================================================ */
-
-function showResizeIssues(
-  issues
-) {
-
-  validationPanel.classList.remove(
-    "hidden"
-  );
-
-
-  validationSummary.innerHTML =
-    `
-      <div class="validation-summary-item">
-        <strong>${issues.length}</strong>
-        <span>PROBLEME LA REDIMENSIONARE</span>
-      </div>
-    `;
-
-
-  validationIssues.innerHTML =
-    "";
-
-
-  issues.forEach(
-    (message) => {
-
-      const item =
-        document.createElement(
-          "div"
-        );
-
-      item.className =
-        "validation-issue warning";
-
-
-      const icon =
-        document.createElement(
-          "strong"
-        );
-
-      icon.textContent =
-        "!";
-
-
-      const text =
-        document.createElement(
-          "span"
-        );
-
-      text.textContent =
-        message;
-
-
-      item.appendChild(
-        icon
-      );
-
-      item.appendChild(
-        text
-      );
-
-      validationIssues.appendChild(
-        item
-      );
-
-    }
-  );
-
-
-  validationPanel.scrollIntoView({
-    behavior:
-      "smooth",
-
-    block:
-      "nearest"
-  });
-
-
-  statusIndicator.classList.remove(
-    "valid",
-    "invalid",
-    "neutral"
-  );
-
-  statusIndicator.classList.add(
-    "warning"
-  );
-
-
-  statusText.textContent =
-    "Redimensionarea a fost oprită pentru a proteja editările existente.";
-
-}
-
-
-/* ============================================================
-   CLEAR RESIZE VALIDATION
-============================================================ */
-
-function clearResizeValidation() {
-
-  validationPanel.classList.add(
-    "hidden"
-  );
-
-}
-
-
-/* ============================================================
-   CHECK GRID
-============================================================ */
-
-checkGridBtn.addEventListener(
-  "click",
-  validateGrid
-);
-
-
-function validateGrid() {
-
-  const issues =
-    [];
-
-  let orphanLetters =
-    0;
-
-  let conflicts =
-    0;
-
-  let incompleteDefinitions =
-    0;
-
-  let incompleteAnswers =
-    0;
-
-
-  for (
-    let row = 0;
-    row < state.rows;
-    row++
-  ) {
-
-    for (
-      let col = 0;
-      col < state.cols;
-      col++
-    ) {
-
-      const cell =
-        state.grid[
-          row
-        ][
-          col
-        ];
-
-
-      /* LETTER CONFLICT */
-
-      if (
-        cell.type ===
-          "letter" &&
-        hasLetterConflict(
-          cell
-        )
-      ) {
-
-        conflicts++;
-
-        issues.push({
-
-          type:
-            "error",
-
-          message:
-            `Conflict de litere la rândul ${row + 1}, coloana ${col + 1}.`
-
-        });
-
-      }
-
-
-      /* ORPHAN LETTER */
-
-      if (
-        cell.type ===
-          "letter" &&
-        cell.manualLetter &&
-        cell.letters.length ===
-          0
-      ) {
-
-        orphanLetters++;
-
-        issues.push({
-
-          type:
-            "warning",
-
-          message:
-            `Litera „${cell.manualLetter}” de la rândul ${row + 1}, coloana ${col + 1} nu aparține unui răspuns.`
-
-        });
-
-      }
-
-
-      /* CLUE */
 
       if (
         cell.type ===
           "clue"
       ) {
 
-        if (
-          !cell.definitions ||
-          cell.definitions.length ===
-            0
-        ) {
+        issues.push(
+          `Rândul ${row + 1}, coloana ${col + 1} conține o definiție și nu poate fi eliminat.`
+        );
 
-          incompleteDefinitions++;
+        continue;
 
-          issues.push({
-
-            type:
-              "warning",
-
-            message:
-              `Căsuța de la rândul ${row + 1}, coloana ${col + 1} nu conține nicio definiție.`
-
-          });
-
-        }
+      }
 
 
-        else {
+      if (
+        cell.type ===
+          "blocked"
+      ) {
 
-          cell.definitions.forEach(
-            (
-              definition,
-              definitionIndex
-            ) => {
+        issues.push(
+          `Rândul ${row + 1}, coloana ${col + 1} este o căsuță blocată și nu poate fi eliminată.`
+        );
 
-              const definitionValid =
+        continue;
 
-                definition.type ===
-                  "image"
-
-                  ? Boolean(
-                      definition.imageData
-                    )
-
-                  : Boolean(
-                      definition.text?.trim()
-                    );
+      }
 
 
-              if (
-                !definitionValid
-              ) {
+      if (
+        cell.manualLetter
+      ) {
 
-                incompleteDefinitions++;
+        issues.push(
+          `Rândul ${row + 1}, coloana ${col + 1} conține litera manuală „${cell.manualLetter}”.`
+        );
 
-                issues.push({
+        continue;
 
-                  type:
-                    "warning",
-
-                  message:
-                    `Definiția ${definitionIndex + 1} de la rândul ${row + 1}, coloana ${col + 1} este incompletă.`
-
-                });
-
-              }
+      }
 
 
-              if (
-                !definition.answers ||
-                definition.answers.length ===
-                  0
-              ) {
+      if (
+        cell.letters &&
+        cell.letters.length >
+          0
+      ) {
 
-                incompleteAnswers++;
-
-                issues.push({
-
-                  type:
-                    "warning",
-
-                  message:
-                    `Definiția ${definitionIndex + 1} de la rândul ${row + 1}, coloana ${col + 1} nu are răspuns.`
-
-                });
-
-              }
-
-
-              else {
-
-                definition.answers.forEach(
-                  (
-                    answer,
-                    answerIndex
-                  ) => {
-
-                    if (
-                      !answer.word ||
-                      !answer.wordId
-                    ) {
-
-                      incompleteAnswers++;
-
-                      issues.push({
-
-                        type:
-                          "warning",
-
-                        message:
-                          `Răspunsul ${answerIndex + 1} al definiției ${definitionIndex + 1}, rând ${row + 1}, coloana ${col + 1}, nu este plasat complet.`
-
-                      });
-
-                    }
-
-                  }
-                );
-
-              }
-
-            }
-          );
-
-        }
+        issues.push(
+          `Rândul ${row + 1}, coloana ${col + 1} face parte dintr-un răspuns existent.`
+        );
 
       }
 
@@ -4636,58 +4273,72 @@ function validateGrid() {
   }
 
 
-  if (
-    issues.length ===
-    0
-  ) {
+  /*
+     Extra word-level protection.
 
-    issues.push({
+     This makes sure no placed word would become partly
+     outside the resized grid.
+  */
 
-      type:
-        "success",
+  state.words.forEach(
+    (word) => {
 
-      message:
-        "Nu au fost găsite probleme în grilă."
+      const outside =
+        word.cells.some(
+          (position) =>
+            position.row >=
+              newRows ||
+            position.col >=
+              newCols
+        );
 
-    });
 
-  }
+      if (
+        outside
+      ) {
+
+        const alreadyReported =
+          issues.some(
+            (issue) =>
+              issue.includes(
+                `„${word.answer}”`
+              )
+          );
 
 
-  renderValidationResults(
-    issues,
-    {
+        if (
+          !alreadyReported
+        ) {
 
-      words:
-        state.words.length,
+          issues.push(
+            `Răspunsul „${word.answer}” ar fi tăiat de noile dimensiuni ale grilei.`
+          );
 
-      intersections:
-        countIntersections(),
+        }
 
-      conflicts,
-
-      special:
-        countSpecialWords(),
-
-      orphanLetters,
-
-      incompleteDefinitions,
-
-      incompleteAnswers
+      }
 
     }
   );
+
+
+  return [
+    ...new Set(
+      issues
+    )
+  ];
 
 }
 
 
 /* ============================================================
-   VALIDATION RESULTS
+   VALIDATION PANEL HELPERS
 ============================================================ */
 
-function renderValidationResults(
+function showValidationIssues(
   issues,
-  stats
+  summaryText =
+    ""
 ) {
 
   validationPanel.classList.remove(
@@ -4695,32 +4346,41 @@ function renderValidationResults(
   );
 
 
-  validationSummary.innerHTML =
-    `
-      <div class="validation-summary-item">
-        <strong>${stats.words}</strong>
-        <span>CUVINTE</span>
-      </div>
-
-      <div class="validation-summary-item">
-        <strong>${stats.intersections}</strong>
-        <span>INTERSECȚII</span>
-      </div>
-
-      <div class="validation-summary-item">
-        <strong>${stats.special}</strong>
-        <span>SPECIALE</span>
-      </div>
-
-      <div class="validation-summary-item">
-        <strong>${stats.conflicts}</strong>
-        <span>CONFLICTE</span>
-      </div>
-    `;
+  validationSummary.textContent =
+    summaryText ||
+    (
+      issues.length === 0
+        ? "Nu au fost găsite probleme."
+        : `Au fost găsite ${issues.length} probleme.`
+    );
 
 
   validationIssues.innerHTML =
     "";
+
+
+  if (
+    issues.length === 0
+  ) {
+
+    const item =
+      document.createElement(
+        "div"
+      );
+
+    item.className =
+      "validation-item success";
+
+    item.textContent =
+      "Grila nu conține probleme structurale detectabile.";
+
+    validationIssues.appendChild(
+      item
+    );
+
+    return;
+
+  }
 
 
   issues.forEach(
@@ -4732,60 +4392,10 @@ function renderValidationResults(
         );
 
       item.className =
-        `validation-issue ${issue.type}`;
+        "validation-item";
 
-
-      let icon =
-        "✓";
-
-
-      if (
-        issue.type ===
-          "error"
-      ) {
-
-        icon =
-          "×";
-
-      }
-
-
-      if (
-        issue.type ===
-          "warning"
-      ) {
-
-        icon =
-          "!";
-
-      }
-
-
-      const iconElement =
-        document.createElement(
-          "strong"
-        );
-
-      iconElement.textContent =
-        icon;
-
-
-      const textElement =
-        document.createElement(
-          "span"
-        );
-
-      textElement.textContent =
-        issue.message;
-
-
-      item.appendChild(
-        iconElement
-      );
-
-      item.appendChild(
-        textElement
-      );
+      item.textContent =
+        issue;
 
       validationIssues.appendChild(
         item
@@ -4796,125 +4406,605 @@ function renderValidationResults(
 
 
   validationPanel.scrollIntoView({
-    behavior:
-      "smooth",
-
-    block:
-      "nearest"
+    behavior: "smooth",
+    block: "nearest"
   });
 
 }
 
 
-/* ============================================================
-   CLOSE VALIDATION
-============================================================ */
+function hideValidationPanel() {
+
+  validationPanel.classList.add(
+    "hidden"
+  );
+
+}
+
 
 closeValidationBtn.addEventListener(
   "click",
+  hideValidationPanel
+);
+
+
+/* ============================================================
+   END OF PART 2
+
+   PART 3 CONTINUES WITH:
+   - CHECK GRID
+   - VALIDATION
+   - PREVIEW
+   - DEFINITION TEXT FITTING
+   - THE PDF FITTING FIX
+============================================================ *//* ============================================================
+   CHECK GRID
+============================================================ */
+
+checkGridBtn.addEventListener(
+  "click",
+  checkGrid
+);
+
+
+function checkGrid() {
+
+  const issues =
+    collectValidationIssues();
+
+
+  if (
+    issues.length === 0
+  ) {
+
+    showValidationIssues(
+      [],
+      "Grila a fost verificată. Nu au fost găsite probleme."
+    );
+
+    showToast(
+      "Grila nu conține probleme detectabile."
+    );
+
+  }
+
+  else {
+
+    showValidationIssues(
+      issues,
+      `Au fost găsite ${issues.length} probleme care necesită atenție.`
+    );
+
+    showToast(
+      `Au fost găsite ${issues.length} probleme.`
+    );
+
+  }
+
+
+  renderGrid();
+
+  updateStatistics();
+
+}
+
+
+/* ============================================================
+   COLLECT VALIDATION ISSUES
+============================================================ */
+
+function collectValidationIssues() {
+
+  const issues =
+    [];
+
+
+  /* ----------------------------------------------------------
+     CELL-LEVEL CHECKS
+  ---------------------------------------------------------- */
+
+  for (
+    let row = 0;
+    row < state.rows;
+    row++
+  ) {
+
+    for (
+      let col = 0;
+      col < state.cols;
+      col++
+    ) {
+
+      const cell =
+        state.grid[row][col];
+
+
+      if (
+        !cell
+      ) {
+
+        continue;
+
+      }
+
+
+      /* ------------------------------------------------------
+         LETTER CONFLICT
+      ------------------------------------------------------ */
+
+      if (
+        cell.type ===
+          "letter" &&
+        hasLetterConflict(
+          cell
+        )
+      ) {
+
+        issues.push(
+          `Conflict de litere la rândul ${row + 1}, coloana ${col + 1}.`
+        );
+
+      }
+
+
+      /* ------------------------------------------------------
+         ORPHAN MANUAL LETTER
+      ------------------------------------------------------ */
+
+      if (
+        cell.type ===
+          "letter" &&
+        cell.manualLetter &&
+        (
+          !cell.letters ||
+          cell.letters.length ===
+            0
+        )
+      ) {
+
+        issues.push(
+          `Litera manuală „${cell.manualLetter}” de la rândul ${row + 1}, coloana ${col + 1} nu aparține unui răspuns plasat.`
+        );
+
+      }
+
+
+      /* ------------------------------------------------------
+         CLUE VALIDATION
+      ------------------------------------------------------ */
+
+      if (
+        cell.type ===
+          "clue"
+      ) {
+
+        const definitions =
+          cell.definitions ||
+          [];
+
+
+        if (
+          definitions.length ===
+            0
+        ) {
+
+          issues.push(
+            `Căsuța cu definiție de la rândul ${row + 1}, coloana ${col + 1} nu conține nicio definiție.`
+          );
+
+          continue;
+
+        }
+
+
+        definitions.forEach(
+          (
+            definition,
+            definitionIndex
+          ) => {
+
+            /* ----------------------------------------------
+               DEFINITION CONTENT
+            ---------------------------------------------- */
+
+            if (
+              definition.type ===
+                "text" &&
+              !String(
+                definition.text ||
+                ""
+              ).trim()
+            ) {
+
+              issues.push(
+                `Definiția ${definitionIndex + 1} de la rândul ${row + 1}, coloana ${col + 1} nu are text.`
+              );
+
+            }
+
+
+            if (
+              definition.type ===
+                "image" &&
+              !definition.imageData
+            ) {
+
+              issues.push(
+                `Definiția ${definitionIndex + 1} de la rândul ${row + 1}, coloana ${col + 1} nu are imagine.`
+              );
+
+            }
+
+
+            const answers =
+              definition.answers ||
+              [];
+
+
+            if (
+              answers.length ===
+                0
+            ) {
+
+              issues.push(
+                `Definiția ${definitionIndex + 1} de la rândul ${row + 1}, coloana ${col + 1} nu are niciun răspuns.`
+              );
+
+              return;
+
+            }
+
+
+            const directions =
+              new Set();
+
+
+            answers.forEach(
+              (
+                answer,
+                answerIndex
+              ) => {
+
+                const normalized =
+                  normalizeAnswer(
+                    answer.word
+                  );
+
+
+                if (
+                  !normalized
+                ) {
+
+                  issues.push(
+                    `Răspunsul ${answerIndex + 1} pentru definiția ${definitionIndex + 1} de la rândul ${row + 1}, coloana ${col + 1} este gol.`
+                  );
+
+                }
+
+
+                if (
+                  !ROUTES[
+                    answer.direction
+                  ]
+                ) {
+
+                  issues.push(
+                    `Răspunsul ${answerIndex + 1} pentru definiția ${definitionIndex + 1} de la rândul ${row + 1}, coloana ${col + 1} are o direcție invalidă.`
+                  );
+
+                }
+
+
+                if (
+                  directions.has(
+                    answer.direction
+                  )
+                ) {
+
+                  issues.push(
+                    `Definiția ${definitionIndex + 1} de la rândul ${row + 1}, coloana ${col + 1} folosește aceeași direcție pentru mai multe răspunsuri.`
+                  );
+
+                }
+
+
+                directions.add(
+                  answer.direction
+                );
+
+
+                /*
+                   An answer may have text entered in the
+                   editor but not yet have been applied.
+
+                   In that case wordId is still null.
+                */
+
+                if (
+                  normalized &&
+                  !answer.wordId
+                ) {
+
+                  issues.push(
+                    `Răspunsul „${normalized}” de la rândul ${row + 1}, coloana ${col + 1} nu a fost încă aplicat în grilă.`
+                  );
+
+                }
+
+              }
+            );
+
+          }
+        );
+
+      }
+
+    }
+
+  }
+
+
+  /* ----------------------------------------------------------
+     WORD-LEVEL CHECKS
+  ---------------------------------------------------------- */
+
+  state.words.forEach(
+    (word) => {
+
+      if (
+        !ROUTES[
+          word.direction
+        ]
+      ) {
+
+        issues.push(
+          `Răspunsul „${word.answer}” are o direcție care nu mai este validă.`
+        );
+
+        return;
+
+      }
+
+
+      if (
+        !Array.isArray(
+          word.cells
+        ) ||
+        word.cells.length !==
+          word.answer.length
+      ) {
+
+        issues.push(
+          `Răspunsul „${word.answer}” are o structură incompletă în grilă.`
+        );
+
+        return;
+
+      }
+
+
+      word.cells.forEach(
+        (
+          position,
+          index
+        ) => {
+
+          const cell =
+            getCell(
+              position.row,
+              position.col
+            );
+
+
+          if (
+            !cell
+          ) {
+
+            issues.push(
+              `Răspunsul „${word.answer}” depășește limitele grilei.`
+            );
+
+            return;
+
+          }
+
+
+          if (
+            cell.type !==
+              "letter"
+          ) {
+
+            issues.push(
+              `Răspunsul „${word.answer}” trece printr-o celulă care nu mai este de tip literă.`
+            );
+
+            return;
+
+          }
+
+
+          const expectedLetter =
+            word.answer[index];
+
+
+          const matchingMembership =
+            (
+              cell.letters ||
+              []
+            ).some(
+              (item) =>
+                item.wordId ===
+                  word.id &&
+                item.letter ===
+                  expectedLetter
+            );
+
+
+          if (
+            !matchingMembership
+          ) {
+
+            issues.push(
+              `Răspunsul „${word.answer}” nu mai este conectat corect la toate celulele sale.`
+            );
+
+          }
+
+        }
+      );
+
+    }
+  );
+
+
+  return [
+    ...new Set(
+      issues
+    )
+  ];
+
+}
+
+
+/* ============================================================
+   CREATOR / PREVIEW MODE
+============================================================ */
+
+creatorModeBtn.addEventListener(
+  "click",
   () => {
 
-    validationPanel.classList.add(
-      "hidden"
+    setViewMode(
+      "creator"
     );
 
   }
 );
 
 
-/* ============================================================
-   CREATOR MODE
-============================================================ */
-
-creatorModeBtn.addEventListener(
-  "click",
-  showCreatorMode
-);
-
-
-function showCreatorMode() {
-
-  state.mode =
-    "creator";
-
-  creatorModeBtn.classList.add(
-    "active"
-  );
-
-  previewModeBtn.classList.remove(
-    "active"
-  );
-
-  creatorView.classList.remove(
-    "hidden"
-  );
-
-  creatorToolbar.classList.remove(
-    "hidden"
-  );
-
-  previewView.classList.add(
-    "hidden"
-  );
-
-}
-
-
-/* ============================================================
-   PREVIEW MODE
-============================================================ */
-
 previewModeBtn.addEventListener(
   "click",
-  showPreviewMode
+  () => {
+
+    setViewMode(
+      "preview"
+    );
+
+  }
 );
 
 
-function showPreviewMode() {
+function setViewMode(mode) {
 
   state.mode =
-    "preview";
+    mode;
 
-  previewTitle.textContent =
-    puzzleTitle.value.trim() ||
-    "Integrame";
 
-  creatorModeBtn.classList.remove(
-    "active"
+  const creatorActive =
+    mode ===
+    "creator";
+
+
+  creatorView.classList.toggle(
+    "hidden",
+    !creatorActive
   );
 
-  previewModeBtn.classList.add(
-    "active"
+  creatorToolbar.classList.toggle(
+    "hidden",
+    !creatorActive
   );
 
-  creatorView.classList.add(
-    "hidden"
+
+  previewView.classList.toggle(
+    "hidden",
+    creatorActive
   );
 
-  creatorToolbar.classList.add(
-    "hidden"
+
+  creatorModeBtn.classList.toggle(
+    "active",
+    creatorActive
   );
 
-  previewView.classList.remove(
-    "hidden"
+  previewModeBtn.classList.toggle(
+    "active",
+    !creatorActive
   );
 
-  renderPreviewGrid();
+
+  if (
+    !creatorActive
+  ) {
+
+    renderPreviewGrid();
+
+  }
+
+  else {
+
+    /*
+       Refit Creator after returning from Preview.
+
+       This is useful if the browser viewport changed while
+       Preview was open.
+    */
+
+    requestAnimationFrame(
+      () => {
+
+        fitAllClueText(
+          crosswordGrid
+        );
+
+      }
+    );
+
+  }
 
 }
 
 
 /* ============================================================
-   PREVIEW GRID
+   RENDER PREVIEW GRID
+
+   IMPORTANT PDF FIX:
+
+   The old approach could try to fit text while the Preview
+   section was display:none.
+
+   An element with display:none has no measurable width or
+   height, so scrollWidth/clientWidth and similar values are
+   not reliable.
+
+   This function renders the Preview normally. If Preview is
+   already visible, its text is fitted immediately.
+
+   Printing uses preparePreviewForPrint(), further below,
+   which temporarily makes Preview measurable even when the
+   user is currently in Creator mode.
 ============================================================ */
 
-function renderPreviewGrid() {
+function renderPreviewGrid(
+  options = {}
+) {
+
+  const {
+    fitText = true
+  } = options;
+
 
   previewGrid.innerHTML =
     "";
 
+
   previewGrid.style.gridTemplateColumns =
     `repeat(${state.cols}, var(--cell-size))`;
+
+
+  previewTitle.textContent =
+    puzzleTitle.value.trim() ||
+    "Integramă";
 
 
   for (
@@ -4930,19 +5020,24 @@ function renderPreviewGrid() {
     ) {
 
       const cell =
-        state.grid[
-          row
-        ][
-          col
-        ];
+        state.grid[row][col];
+
 
       const element =
         document.createElement(
           "div"
         );
 
+
       element.className =
         "grid-cell";
+
+
+      element.dataset.row =
+        row;
+
+      element.dataset.col =
+        col;
 
 
       renderCellContent(
@@ -4951,13 +5046,6 @@ function renderPreviewGrid() {
         true,
         row,
         col
-      );
-
-
-      element.classList.remove(
-        "selected",
-        "conflict",
-        "warning"
       );
 
 
@@ -4970,36 +5058,94 @@ function renderPreviewGrid() {
   }
 
 
-  requestAnimationFrame(
-    () => {
+  if (
+    fitText &&
+    isElementMeasurable(
+      previewGrid
+    )
+  ) {
 
-      fitAllClueText(
-        previewGrid
-      );
+    fitAllClueText(
+      previewGrid
+    );
 
-    }
+  }
+
+}
+
+
+/* ============================================================
+   IS ELEMENT MEASURABLE
+============================================================ */
+
+function isElementMeasurable(
+  element
+) {
+
+  if (
+    !element
+  ) {
+
+    return false;
+
+  }
+
+
+  const rect =
+    element.getBoundingClientRect();
+
+
+  return (
+    rect.width > 0 &&
+    rect.height > 0
   );
 
 }
 
 
 /* ============================================================
-   FIT CLUE TEXT
+   CLUE TEXT FITTING
 
-   Arrow layer is a sibling of clue-cell-content,
-   not part of clue-part.
+   RULES:
 
-   Therefore arrows have ZERO influence on fitting.
+   - text must remain completely inside its clue subsection
+   - words must not be split in the middle
+   - no automatic hyphenation
+   - short definitions remain larger
+   - long definitions shrink
+   - arrows do NOT participate in fitting
+   - images are ignored by this function
+
+   IMPORTANT:
+
+   The function now waits for a measurable grid.
+
+   It also stores the fitted font size directly on each
+   .clue-part-text element. That inline size remains intact
+   when the whole Preview grid is scaled for PDF.
 ============================================================ */
 
 function fitAllClueText(
-  root = document
+  root
 ) {
+
+  if (
+    !root ||
+    !isElementMeasurable(
+      root
+    )
+  ) {
+
+    return;
+
+  }
+
 
   const textElements =
     root.querySelectorAll(
       ".clue-part-text"
     );
+
 
   textElements.forEach(
     (element) => {
@@ -5014,48 +5160,204 @@ function fitAllClueText(
 }
 
 
+/* ============================================================
+   FIT ONE CLUE TEXT ELEMENT
+============================================================ */
+
 function fitClueText(
   element
 ) {
 
-  if (!element) {
-    return;
+  if (
+    !element
+  ) {
+
+    return null;
+
   }
 
 
-  const parent =
+  const container =
     element.closest(
       ".clue-part"
     );
 
-  if (!parent) {
-    return;
-  }
 
-
-  let size =
-    10;
-
-
-  element.style.fontSize =
-    `${size}px`;
-
-
-  while (
-    size > 5 &&
-    (
-      element.scrollHeight >
-        element.clientHeight ||
-      element.scrollWidth >
-        element.clientWidth
+  if (
+    !container ||
+    !isElementMeasurable(
+      container
     )
   ) {
 
-    size -=
-      0.5;
+    return null;
+
+  }
+
+
+  /*
+     Remove any previous fitted value first.
+
+     This ensures editing a definition causes the browser to
+     calculate the new size from the maximum again instead of
+     being trapped at an older smaller size.
+  */
+
+  element.style.removeProperty(
+    "font-size"
+  );
+
+  element.style.removeProperty(
+    "line-height"
+  );
+
+
+  /*
+     These values intentionally match the original fitting
+     behaviour closely.
+
+     10px = maximum definition font size.
+     5px  = minimum definition font size.
+  */
+
+  const maximumFontSize =
+    10;
+
+  const minimumFontSize =
+    5;
+
+  const step =
+    0.25;
+
+
+  let fontSize =
+    maximumFontSize;
+
+
+  /*
+     Explicitly reinforce the clue rules at runtime.
+
+     CSS will also contain these rules, but setting them here
+     protects the Preview/PDF against print-style overrides.
+  */
+
+  element.style.wordBreak =
+    "normal";
+
+  element.style.overflowWrap =
+    "normal";
+
+  element.style.hyphens =
+    "none";
+
+  element.style.whiteSpace =
+    "normal";
+
+
+  element.style.fontSize =
+    `${fontSize}px`;
+
+  element.style.lineHeight =
+    "1.05";
+
+
+  /*
+     A tiny tolerance avoids unnecessary shrinking caused by
+     sub-pixel rounding in Chromium.
+  */
+
+  const tolerance =
+    0.5;
+
+
+  while (
+    fontSize >
+      minimumFontSize &&
+    (
+      element.scrollWidth >
+        element.clientWidth +
+          tolerance ||
+      element.scrollHeight >
+        element.clientHeight +
+          tolerance
+    )
+  ) {
+
+    fontSize -=
+      step;
+
 
     element.style.fontSize =
-      `${size}px`;
+      `${fontSize}px`;
+
+  }
+
+
+  /*
+     Lock the final calculated values inline.
+
+     transform: scale() used later for A4 does not cause the
+     browser to recalculate this font size.
+  */
+
+  const finalSize =
+    Math.max(
+      fontSize,
+      minimumFontSize
+    );
+
+
+  element.style.fontSize =
+    `${finalSize}px`;
+
+  element.style.lineHeight =
+    "1.05";
+
+
+  element.dataset.fittedFontSize =
+    String(
+      finalSize
+    );
+
+
+  return finalSize;
+
+}
+
+
+/* ============================================================
+   FIT CREATOR + PREVIEW CONSISTENTLY
+
+   Creator and Preview use identical cell dimensions, so the
+   same fitting algorithm should produce the same result.
+
+   This helper is primarily used before printing.
+============================================================ */
+
+function fitVisibleGridText() {
+
+  if (
+    isElementMeasurable(
+      crosswordGrid
+    )
+  ) {
+
+    fitAllClueText(
+      crosswordGrid
+    );
+
+  }
+
+
+  if (
+    isElementMeasurable(
+      previewGrid
+    )
+  ) {
+
+    fitAllClueText(
+      previewGrid
+    );
 
   }
 
@@ -5063,67 +5365,355 @@ function fitClueText(
 
 
 /* ============================================================
-   TITLE
+   WAIT FOR IMAGES
+
+   Image definitions may still be decoding when Preview is
+   created.
+
+   Waiting for them before final print preparation prevents
+   the browser from changing layout immediately after the
+   print scale has been calculated.
 ============================================================ */
 
-puzzleTitle.addEventListener(
-  "input",
-  () => {
+async function waitForPreviewImages() {
 
-    previewTitle.textContent =
-      puzzleTitle.value.trim() ||
-      "Integrame";
+  const images =
+    [
+      ...previewGrid.querySelectorAll(
+        "img"
+      )
+    ];
+
+
+  if (
+    images.length === 0
+  ) {
+
+    return;
 
   }
-);
 
 
-/* ============================================================
-   PRINT
-============================================================ */
+  await Promise.all(
+    images.map(
+      (image) => {
 
-printBtn.addEventListener(
-  "click",
-  () => {
+        if (
+          image.complete
+        ) {
 
-    previewTitle.textContent =
-      puzzleTitle.value.trim() ||
-      "Integrame";
+          if (
+            typeof image.decode ===
+              "function"
+          ) {
 
-    renderPreviewGrid();
+            return image
+              .decode()
+              .catch(
+                () => {}
+              );
+
+          }
 
 
-    requestAnimationFrame(
-      () => {
+          return Promise.resolve();
 
-        preparePrintScale();
+        }
 
 
-        requestAnimationFrame(
-          () => {
+        return new Promise(
+          (resolve) => {
 
-            window.print();
+            const finish =
+              () => {
+
+                resolve();
+
+              };
+
+
+            image.addEventListener(
+              "load",
+              finish,
+              {
+                once: true
+              }
+            );
+
+
+            image.addEventListener(
+              "error",
+              finish,
+              {
+                once: true
+              }
+            );
 
           }
         );
 
       }
-    );
+    )
+  );
 
-  }
-);
+}
 
 
 /* ============================================================
-   PRINT SCALE
+   NEXT FRAME
+============================================================ */
+
+function nextFrame() {
+
+  return new Promise(
+    (resolve) => {
+
+      requestAnimationFrame(
+        () => {
+
+          requestAnimationFrame(
+            resolve
+          );
+
+        }
+      );
+
+    }
+  );
+
+}
+
+
+/* ============================================================
+   PREPARE PREVIEW FOR PRINT
+
+   THIS IS THE MAIN PDF FIX.
+
+   Problem:
+   --------
+   Preview may be hidden while the user presses Print.
+
+   Hidden elements cannot be accurately measured, therefore
+   clue text could be fitted incorrectly before the PDF was
+   generated.
+
+   Fix:
+   ----
+   1. Render Preview.
+   2. Temporarily make the Preview measurable off-screen.
+   3. Wait for browser layout.
+   4. Wait for image clues.
+   5. Fit definition text at REAL cell dimensions.
+   6. Lock those font sizes inline.
+   7. Calculate one uniform A4 scale for the WHOLE grid.
+   8. Restore the temporary screen visibility settings.
+   9. Print.
+
+   The clue text therefore scales WITH its box rather than
+   being independently recalculated by the print layout.
+============================================================ */
+
+async function preparePreviewForPrint() {
+
+  /*
+     First render without fitting.
+
+     We intentionally postpone fitting until we know the
+     Preview has measurable dimensions.
+  */
+
+  renderPreviewGrid({
+    fitText: false
+  });
+
+
+  const previewWasHidden =
+    previewView.classList.contains(
+      "hidden"
+    );
+
+
+  const originalStyle = {
+    position:
+      previewView.style.position,
+
+    left:
+      previewView.style.left,
+
+    top:
+      previewView.style.top,
+
+    width:
+      previewView.style.width,
+
+    visibility:
+      previewView.style.visibility,
+
+    pointerEvents:
+      previewView.style.pointerEvents,
+
+    display:
+      previewView.style.display
+  };
+
+
+  /*
+     If the user is in Creator mode, Preview is hidden.
+
+     Temporarily remove the hidden class and place Preview
+     far outside the visible viewport.
+
+     visibility:hidden still allows layout measurement.
+  */
+
+  if (
+    previewWasHidden
+  ) {
+
+    previewView.classList.remove(
+      "hidden"
+    );
+
+
+    previewView.style.position =
+      "absolute";
+
+    previewView.style.left =
+      "-100000px";
+
+    previewView.style.top =
+      "0";
+
+    previewView.style.width =
+      "max-content";
+
+    previewView.style.visibility =
+      "hidden";
+
+    previewView.style.pointerEvents =
+      "none";
+
+    previewView.style.display =
+      "block";
+
+  }
+
+
+  /*
+     Allow the browser to calculate the actual 48px grid
+     cells and clue subsection sizes.
+  */
+
+  await nextFrame();
+
+
+  /*
+     Make sure image definitions have completed their layout.
+  */
+
+  await waitForPreviewImages();
+
+
+  await nextFrame();
+
+
+  /*
+     Fit text BEFORE applying the print transform.
+  */
+
+  fitAllClueText(
+    previewGrid
+  );
+
+
+  /*
+     One more layout pass after font sizes have been locked.
+  */
+
+  await nextFrame();
+
+
+  /*
+     Calculate uniform scale for A4.
+
+     This must happen AFTER definition text has been fitted.
+  */
+
+  preparePrintScale();
+
+
+  await nextFrame();
+
+
+  /*
+     Restore the Preview's screen state.
+
+     IMPORTANT:
+     We do NOT rebuild the Preview here.
+
+     Rebuilding it would throw away the fitted inline font
+     sizes we just calculated.
+  */
+
+  if (
+    previewWasHidden
+  ) {
+
+    previewView.classList.add(
+      "hidden"
+    );
+
+  }
+
+
+  previewView.style.position =
+    originalStyle.position;
+
+  previewView.style.left =
+    originalStyle.left;
+
+  previewView.style.top =
+    originalStyle.top;
+
+  previewView.style.width =
+    originalStyle.width;
+
+  previewView.style.visibility =
+    originalStyle.visibility;
+
+  previewView.style.pointerEvents =
+    originalStyle.pointerEvents;
+
+  previewView.style.display =
+    originalStyle.display;
+
+}
+
+
+/* ============================================================
+   PREPARE PRINT SCALE
+
+   IMPORTANT:
+
+   We scale the complete grid as one object.
+
+   We do NOT:
+   - resize individual cells
+   - recalculate clue font size
+   - alter image proportions
+   - alter arrow proportions
+
+   Therefore what the user sees in Preview is preserved
+   proportionally in the PDF.
 ============================================================ */
 
 function preparePrintScale() {
 
-  const scaleWrapper =
+  const scaleContainer =
     document.getElementById(
       "previewGridScale"
     );
+
 
   const printArea =
     document.getElementById(
@@ -5132,8 +5722,9 @@ function preparePrintScale() {
 
 
   if (
-    !scaleWrapper ||
-    !printArea
+    !scaleContainer ||
+    !printArea ||
+    !previewGrid
   ) {
 
     return;
@@ -5141,19 +5732,56 @@ function preparePrintScale() {
   }
 
 
-  scaleWrapper.style.transform =
+  /*
+     Remove previous scale first so measurements always use
+     the original grid dimensions.
+  */
+
+  scaleContainer.style.transform =
     "none";
 
-  scaleWrapper.style.transformOrigin =
-    "top center";
+  scaleContainer.style.transformOrigin =
+    "top left";
 
+
+  /*
+     Width and height of the complete unscaled grid.
+
+     scrollWidth/scrollHeight are useful here because arrows
+     can extend visually beyond their clue boxes.
+  */
 
   const gridWidth =
-    previewGrid.scrollWidth;
+    Math.max(
+      previewGrid.scrollWidth,
+      previewGrid.offsetWidth
+    );
 
   const gridHeight =
-    previewGrid.scrollHeight;
+    Math.max(
+      previewGrid.scrollHeight,
+      previewGrid.offsetHeight
+    );
 
+
+  if (
+    !gridWidth ||
+    !gridHeight
+  ) {
+
+    return;
+
+  }
+
+
+  /*
+     A4-friendly printable target.
+
+     These values preserve the previous general behaviour:
+     approximately 740px × 980px of usable grid space.
+
+     The scale is always uniform.
+  */
 
   const maxWidth =
     740;
@@ -5171,6 +5799,12 @@ function preparePrintScale() {
     gridHeight;
 
 
+  /*
+     Never enlarge a smaller grid.
+
+     Only shrink when necessary.
+  */
+
   const scale =
     Math.min(
       1,
@@ -5179,59 +5813,139 @@ function preparePrintScale() {
     );
 
 
-  scaleWrapper.style.setProperty(
-    "--print-scale",
-    String(
-      scale
-    )
-  );
-
-
-  scaleWrapper.style.transform =
+  scaleContainer.style.transform =
     `scale(${scale})`;
 
+  scaleContainer.style.transformOrigin =
+    "top left";
+
+
+  /*
+     Because CSS transforms do not alter document flow,
+     give the print area the scaled dimensions explicitly.
+
+     This prevents excessive blank space after the grid.
+  */
+
+  printArea.style.width =
+    `${gridWidth * scale}px`;
 
   printArea.style.height =
     `${gridHeight * scale}px`;
+
+
+  scaleContainer.dataset.printScale =
+    String(
+      scale
+    );
 
 }
 
 
 /* ============================================================
-   AFTER PRINT
+   CLEAR PRINT SCALE
 ============================================================ */
 
-window.addEventListener(
-  "afterprint",
-  () => {
+function clearPrintScale() {
 
-    const scaleWrapper =
-      document.getElementById(
-        "previewGridScale"
-      );
+  const scaleContainer =
+    document.getElementById(
+      "previewGridScale"
+    );
 
-    const printArea =
-      document.getElementById(
-        "printGridArea"
-      );
+  const printArea =
+    document.getElementById(
+      "printGridArea"
+    );
 
 
-    if (
-      scaleWrapper
-    ) {
+  if (
+    scaleContainer
+  ) {
 
-      scaleWrapper.style.transform =
-        "none";
+    scaleContainer.style.transform =
+      "";
+
+    scaleContainer.style.transformOrigin =
+      "";
+
+    delete scaleContainer.dataset.printScale;
+
+  }
+
+
+  if (
+    printArea
+  ) {
+
+    printArea.style.width =
+      "";
+
+    printArea.style.height =
+      "";
+
+  }
+
+}
+
+
+/* ============================================================
+   PRINT / SAVE AS PDF
+
+   The print dialog is opened only after Preview has been
+   measured, clue text fitted, and the whole grid scaled.
+============================================================ */
+
+printBtn.addEventListener(
+  "click",
+  async () => {
+
+    /*
+       Disable the button while preparing print layout so a
+       double-click cannot launch overlapping print jobs.
+    */
+
+    printBtn.disabled =
+      true;
+
+
+    try {
+
+      await preparePreviewForPrint();
+
+
+      /*
+         Give Chromium one final frame with the locked
+         definition font sizes and grid transform.
+      */
+
+      await nextFrame();
+
+
+      window.print();
 
     }
 
-
-    if (
-      printArea
+    catch (
+      error
     ) {
 
-      printArea.style.height =
-        "";
+      console.error(
+        "Print preparation failed:",
+        error
+      );
+
+
+      showToast(
+        "Previzualizarea pentru PDF nu a putut fi pregătită."
+      );
+
+    }
+
+    finally {
+
+      printBtn.disabled =
+        false;
 
     }
 
@@ -5240,6 +5954,146 @@ window.addEventListener(
 
 
 /* ============================================================
+   AFTER PRINT
+
+   Keep the normal Preview clean after the print dialog
+   closes.
+
+   If Preview mode is currently active we render it again
+   normally and refit it at its normal dimensions.
+============================================================ */
+
+window.addEventListener(
+  "afterprint",
+  () => {
+
+    clearPrintScale();
+
+
+    if (
+      state.mode ===
+        "preview"
+    ) {
+
+      renderPreviewGrid();
+
+    }
+
+  }
+);
+
+
+/* ============================================================
+   PUZZLE TITLE
+============================================================ */
+
+puzzleTitle.addEventListener(
+  "input",
+  () => {
+
+    previewTitle.textContent =
+      puzzleTitle.value.trim() ||
+      "Integramă";
+
+  }
+);
+
+
+/* ============================================================
+   BEFORE PRINT FALLBACK
+
+   Some browsers may trigger print through the keyboard
+   shortcut rather than our button.
+
+   We cannot perform an awaited preparation inside the native
+   beforeprint event, but we can at least ensure an already
+   visible Preview has fitted clue text.
+
+   The application's own "Tipărește / PDF" button remains the
+   preferred print route because it runs the complete async
+   preparation sequence above.
+============================================================ */
+
+window.addEventListener(
+  "beforeprint",
+  () => {
+
+    if (
+      isElementMeasurable(
+        previewGrid
+      )
+    ) {
+
+      fitAllClueText(
+        previewGrid
+      );
+
+      preparePrintScale();
+
+    }
+
+  }
+);
+
+
+/* ============================================================
+   REFIT ON WINDOW RESIZE
+
+   Creator normally keeps fixed-size cells, but this protects
+   text fitting if surrounding layout or browser zoom changes.
+============================================================ */
+
+let resizeFitTimer =
+  null;
+
+
+window.addEventListener(
+  "resize",
+  () => {
+
+    clearTimeout(
+      resizeFitTimer
+    );
+
+
+    resizeFitTimer =
+      setTimeout(
+        () => {
+
+          if (
+            state.mode ===
+              "creator"
+          ) {
+
+            fitAllClueText(
+              crosswordGrid
+            );
+
+          }
+
+          else {
+
+            renderPreviewGrid();
+
+          }
+
+        },
+        100
+      );
+
+  }
+);
+
+
+/* ============================================================
+   END OF PART 3
+
+   PART 4 CONTINUES WITH:
+   - remaining utility functions
+   - keyboard navigation
+   - toast
+   - startup / initialization
+============================================================ *//* ============================================================
    TOAST
 ============================================================ */
 
@@ -5287,6 +6141,12 @@ function showToast(
 
 /* ============================================================
    KEYBOARD NAVIGATION
+
+   Arrow keys move between grid cells while the Creator
+   is active.
+
+   Navigation is ignored while the user is typing in an
+   input, textarea or interacting with a button.
 ============================================================ */
 
 document.addEventListener(
@@ -5398,6 +6258,7 @@ document.addEventListener(
 
       event.preventDefault();
 
+
       selectCell(
         row,
         col
@@ -5410,10 +6271,99 @@ document.addEventListener(
 
 
 /* ============================================================
+   INITIAL GRID INPUT VALUES
+
+   Keep the toolbar inputs synchronised with the actual
+   starting grid dimensions.
+============================================================ */
+
+gridRowsInput.value =
+  state.rows;
+
+gridColsInput.value =
+  state.cols;
+
+
+/* ============================================================
+   INITIAL PREVIEW TITLE
+============================================================ */
+
+previewTitle.textContent =
+  puzzleTitle.value.trim() ||
+  "Integramă";
+
+
+/* ============================================================
    INITIALIZE
+
+   This creates the first empty grid.
+
+   IMPORTANT:
+   initializeGrid() is used only for initial creation.
+
+   Later resizing uses resizeGridNonDestructive(), so existing
+   work is never silently erased by changing grid dimensions.
 ============================================================ */
 
 initializeGrid(
   state.rows,
   state.cols
 );
+
+
+/* ============================================================
+   INITIAL STATISTICS
+============================================================ */
+
+updateStatistics();
+
+
+/* ============================================================
+   INITIAL VIEW
+============================================================ */
+
+state.mode =
+  "creator";
+
+creatorModeBtn.classList.add(
+  "active"
+);
+
+previewModeBtn.classList.remove(
+  "active"
+);
+
+creatorView.classList.remove(
+  "hidden"
+);
+
+creatorToolbar.classList.remove(
+  "hidden"
+);
+
+previewView.classList.add(
+  "hidden"
+);
+
+
+/* ============================================================
+   INITIAL CLUE FIT
+
+   Wait for the first browser layout before checking clue
+   dimensions.
+============================================================ */
+
+requestAnimationFrame(
+  () => {
+
+    fitAllClueText(
+      crosswordGrid
+    );
+
+  }
+);
+
+
+/* ============================================================
+   APP READY
+============================================================ */
