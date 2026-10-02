@@ -1,1 +1,1557 @@
-:root{font-family:Inter,Arial,sans-serif;color:#172033;background:#eef2f6}*{box-sizing:border-box}body{margin:0}header{height:82px;background:#132c4d;color:white;display:flex;align-items:center;justify-content:space-between;padding:12px 28px}h1{margin:0;font-size:24px}header p{margin:4px 0 0;opacity:.75}.tabs{display:flex;gap:8px}.tabs button{background:transparent;color:white;border:1px solid #ffffff55}.tabs .active{background:white;color:#132c4d}button,input,select{font:inherit}button{border:1px solid #bcc7d4;border-radius:7px;padding:9px 12px;background:white;cursor:pointer}main{display:grid;grid-template-columns:330px 1fr;min-height:calc(100vh - 82px)}aside{background:white;padding:20px;border-right:1px solid #d8e0e8;overflow:auto}aside h2,aside h3{margin:4px 0 12px}label{display:block;font-size:13px;font-weight:600;margin:10px 0}input,select{width:100%;margin-top:5px;padding:8px;border:1px solid #c9d2dc;border-radius:6px}.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}hr{border:0;border-top:1px solid #e2e7ec;margin:18px 0}.hint{font-size:12px;color:#667085}.workspace{padding:28px;overflow:auto}.paper{background:white;min-height:80vh;padding:28px;box-shadow:0 3px 16px #1b2b3b18;width:max-content;min-width:700px;margin:auto}.paper>h2{text-align:center;margin-top:0}.grid{display:grid;border:2px solid #111;width:max-content}.cell{width:54px;height:54px;border-right:1px solid #222;border-bottom:1px solid #222;position:relative;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;background:white;overflow:hidden}.cell.selected{outline:3px solid #3478c7;outline-offset:-3px}.cell.block{background:#172033}.cell.clue{font-size:7.5px;font-weight:600;align-items:stretch;justify-content:stretch}.cluePart{position:absolute;display:flex;align-items:center;justify-content:center;text-align:center;padding:2px;line-height:1.05}.clue.one .cluePart{inset:0}.clue.two .cluePart:nth-child(1){left:0;top:0;width:100%;height:50%;border-bottom:1px solid #222}.clue.two .cluePart:nth-child(2){left:0;bottom:0;width:100%;height:50%}.clue.three .cluePart:nth-child(1){left:0;top:0;width:50%;height:50%;border-right:1px solid #222;border-bottom:1px solid #222}.clue.three .cluePart:nth-child(2){right:0;top:0;width:50%;height:50%;border-bottom:1px solid #222}.clue.three .cluePart:nth-child(3){left:0;bottom:0;width:100%;height:50%}.arrow{font-size:9px;margin-left:2px}.conflict{background:#ffd8d8!important;box-shadow:inset 0 0 0 3px #c92a2a}.warn{color:#b42318;font-size:13px;margin-top:10px}.ok{color:#067647;font-size:13px;margin-top:10px}#summary{margin-top:18px;font-size:13px}.reader aside{display:none}.reader main{grid-template-columns:1fr}.reader .cell.letter{font-size:0}.reader .cell.selected{outline:none}@media print{header,aside{display:none!important}main{display:block}.workspace{padding:0}.paper{box-shadow:none;min-width:0;margin:0;padding:5mm}.cell{width:13mm;height:13mm}.grid{margin:auto}body{background:white}}
+/* ============================================================
+   INTEGRAME CREATOR
+   style.css
+============================================================ */
+
+:root {
+  --bg: #f3f6f9;
+  --surface: #ffffff;
+  --surface-soft: #f8fafc;
+
+  --text: #172033;
+  --text-soft: #667085;
+  --text-light: #98a2b3;
+
+  --border: #d8dee8;
+  --border-dark: #aeb8c7;
+
+  --primary: #2457d6;
+  --primary-dark: #1945b5;
+  --primary-soft: #eaf0ff;
+
+  --success: #1f8a5b;
+  --success-soft: #e9f8f1;
+
+  --warning: #b7791f;
+  --warning-soft: #fff7e6;
+
+  --danger: #c93c3c;
+  --danger-soft: #fff0f0;
+
+  --blocked: #273142;
+
+  --shadow:
+    0 1px 2px rgba(16, 24, 40, 0.04),
+    0 8px 24px rgba(16, 24, 40, 0.06);
+
+  --radius: 14px;
+  --radius-small: 9px;
+
+  --cell-size: 48px;
+}
+
+
+/* ============================================================
+   RESET
+============================================================ */
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+
+  background: var(--bg);
+  color: var(--text);
+
+  font-family:
+    Inter,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    Helvetica,
+    Arial,
+    sans-serif;
+
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+input,
+textarea {
+  width: 100%;
+
+  border: 1px solid var(--border);
+  border-radius: 8px;
+
+  background: #ffffff;
+  color: var(--text);
+
+  outline: none;
+
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+input {
+  min-height: 42px;
+  padding: 8px 11px;
+}
+
+textarea {
+  min-height: 80px;
+  padding: 10px 11px;
+
+  resize: vertical;
+}
+
+input:focus,
+textarea:focus {
+  border-color: var(--primary);
+
+  box-shadow:
+    0 0 0 3px rgba(36, 87, 214, 0.12);
+}
+
+label {
+  display: block;
+
+  margin-bottom: 6px;
+
+  color: #344054;
+
+  font-size: 13px;
+  font-weight: 650;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin-top: 0;
+}
+
+.hidden {
+  display: none !important;
+}
+
+
+/* ============================================================
+   HEADER
+============================================================ */
+
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  min-height: 76px;
+  padding: 12px 28px;
+
+  background: rgba(255, 255, 255, 0.96);
+  border-bottom: 1px solid var(--border);
+
+  backdrop-filter: blur(10px);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 44px;
+  height: 44px;
+
+  border-radius: 11px;
+
+  background: var(--primary);
+  color: #ffffff;
+
+  font-size: 25px;
+  font-weight: 800;
+}
+
+.brand-text h1 {
+  margin: 0;
+
+  font-size: 19px;
+  line-height: 1.25;
+}
+
+.brand-text p {
+  margin: 3px 0 0;
+
+  color: var(--text-soft);
+
+  font-size: 12px;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+
+/* ============================================================
+   VIEW SWITCHER
+============================================================ */
+
+.view-switcher {
+  display: flex;
+
+  padding: 4px;
+
+  border: 1px solid var(--border);
+  border-radius: 10px;
+
+  background: var(--surface-soft);
+}
+
+.view-button {
+  min-height: 36px;
+  padding: 6px 14px;
+
+  border: 0;
+  border-radius: 7px;
+
+  background: transparent;
+  color: var(--text-soft);
+
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.view-button:hover {
+  color: var(--text);
+}
+
+.view-button.active {
+  background: #ffffff;
+  color: var(--primary);
+
+  box-shadow: 0 1px 4px rgba(16, 24, 40, 0.12);
+}
+
+
+/* ============================================================
+   BUTTONS
+============================================================ */
+
+.primary-button,
+.secondary-button,
+.danger-button {
+  min-height: 40px;
+  padding: 8px 15px;
+
+  border-radius: 8px;
+
+  font-weight: 650;
+
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    transform 0.1s ease;
+}
+
+.primary-button {
+  border: 1px solid var(--primary);
+
+  background: var(--primary);
+  color: #ffffff;
+}
+
+.primary-button:hover {
+  border-color: var(--primary-dark);
+  background: var(--primary-dark);
+}
+
+.secondary-button {
+  border: 1px solid var(--border);
+
+  background: #ffffff;
+  color: #344054;
+}
+
+.secondary-button:hover {
+  border-color: var(--border-dark);
+
+  background: #f9fafb;
+}
+
+.danger-button {
+  border: 1px solid #efc4c4;
+
+  background: #ffffff;
+  color: var(--danger);
+}
+
+.danger-button:hover {
+  background: var(--danger-soft);
+}
+
+.full-width {
+  width: 100%;
+}
+
+.primary-button:active,
+.secondary-button:active,
+.danger-button:active {
+  transform: translateY(1px);
+}
+
+.icon-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 34px;
+  height: 34px;
+
+  padding: 0;
+
+  border: 1px solid var(--border);
+  border-radius: 8px;
+
+  background: #ffffff;
+  color: var(--text-soft);
+
+  font-size: 20px;
+}
+
+.icon-button:hover {
+  background: var(--surface-soft);
+  color: var(--text);
+}
+
+
+/* ============================================================
+   APP CONTAINER
+============================================================ */
+
+.app-container {
+  width: min(1600px, calc(100% - 40px));
+
+  margin: 24px auto 60px;
+}
+
+.card {
+  background: var(--surface);
+
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+
+  box-shadow: var(--shadow);
+}
+
+
+/* ============================================================
+   TOOLBAR
+============================================================ */
+
+.toolbar {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+
+  margin-bottom: 18px;
+  padding: 16px 18px;
+}
+
+.title-field {
+  flex: 1;
+  max-width: 520px;
+}
+
+.field-group {
+  margin-bottom: 15px;
+}
+
+.field-group:last-child {
+  margin-bottom: 0;
+}
+
+.grid-size-controls {
+  display: flex;
+  align-items: flex-end;
+  gap: 9px;
+}
+
+.small-field {
+  width: 82px;
+}
+
+.small-field input {
+  text-align: center;
+}
+
+.grid-times {
+  padding-bottom: 9px;
+
+  color: var(--text-light);
+
+  font-size: 17px;
+}
+
+
+/* ============================================================
+   WORKSPACE
+============================================================ */
+
+.workspace {
+  display: grid;
+
+  grid-template-columns:
+    minmax(0, 1fr)
+    370px;
+
+  gap: 18px;
+
+  align-items: start;
+}
+
+
+/* ============================================================
+   GRID SECTION
+============================================================ */
+
+.grid-section {
+  min-width: 0;
+  padding: 20px;
+}
+
+.section-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+
+  margin-bottom: 18px;
+}
+
+.section-heading h2 {
+  margin-bottom: 3px;
+
+  font-size: 18px;
+}
+
+.section-heading p {
+  margin: 0;
+
+  color: var(--text-soft);
+
+  font-size: 13px;
+}
+
+
+/* ============================================================
+   LEGEND
+============================================================ */
+
+.grid-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+
+  color: var(--text-soft);
+
+  font-size: 11px;
+}
+
+.legend-box {
+  width: 14px;
+  height: 14px;
+
+  border: 1px solid var(--border-dark);
+}
+
+.legend-box.normal {
+  background: #ffffff;
+}
+
+.legend-box.clue {
+  background: #eef2f7;
+}
+
+.legend-box.blocked {
+  background: var(--blocked);
+}
+
+
+/* ============================================================
+   GRID WRAPPER
+============================================================ */
+
+.grid-scroll {
+  overflow: auto;
+
+  width: 100%;
+  min-height: 550px;
+
+  padding: 20px;
+
+  border: 1px solid #e2e7ee;
+  border-radius: 10px;
+
+  background:
+    linear-gradient(#f7f9fb 1px, transparent 1px),
+    linear-gradient(90deg, #f7f9fb 1px, transparent 1px),
+    #fbfcfd;
+
+  background-size: 20px 20px;
+}
+
+
+/* ============================================================
+   CROSSWORD GRID
+============================================================ */
+
+.crossword-grid {
+  display: grid;
+
+  width: max-content;
+
+  margin: 0 auto;
+
+  border-top: 2px solid #263142;
+  border-left: 2px solid #263142;
+
+  background: #ffffff;
+
+  user-select: none;
+}
+
+
+/* ============================================================
+   CELLS
+============================================================ */
+
+.grid-cell {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: var(--cell-size);
+  height: var(--cell-size);
+
+  padding: 0;
+
+  overflow: hidden;
+
+  border: 0;
+  border-right: 1px solid #5b6574;
+  border-bottom: 1px solid #5b6574;
+
+  background: #ffffff;
+  color: #111827;
+
+  font-weight: 700;
+
+  transition:
+    box-shadow 0.12s ease,
+    background 0.12s ease;
+}
+
+.grid-cell:hover {
+  z-index: 2;
+
+  box-shadow:
+    inset 0 0 0 2px var(--primary);
+}
+
+.grid-cell.selected {
+  z-index: 3;
+
+  box-shadow:
+    inset 0 0 0 3px var(--primary);
+}
+
+.grid-cell.conflict {
+  z-index: 4;
+
+  background: var(--danger-soft);
+
+  box-shadow:
+    inset 0 0 0 3px var(--danger);
+}
+
+.grid-cell.warning {
+  background: var(--warning-soft);
+}
+
+
+/* ============================================================
+   LETTER CELLS
+============================================================ */
+
+.grid-cell.letter-cell {
+  font-size: 22px;
+  text-transform: uppercase;
+}
+
+.cell-letter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 100%;
+  height: 100%;
+}
+
+
+/* ============================================================
+   BLOCKED CELLS
+============================================================ */
+
+.grid-cell.blocked-cell {
+  background: var(--blocked);
+}
+
+.grid-cell.blocked-cell:hover {
+  background: #313d50;
+}
+
+
+/* ============================================================
+   CLUE CELLS
+============================================================ */
+
+.grid-cell.clue-cell {
+  display: block;
+
+  background: #eef2f6;
+
+  font-size: 7px;
+  font-weight: 650;
+  line-height: 1.05;
+
+  text-align: left;
+}
+
+.clue-cell-content {
+  position: absolute;
+  inset: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  width: 100%;
+  height: 100%;
+}
+
+.clue-part {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex: 1;
+
+  min-width: 0;
+  min-height: 0;
+
+  padding: 3px 8px 3px 3px;
+
+  overflow: hidden;
+
+  border-bottom: 1px solid #7b8491;
+
+  text-align: center;
+}
+
+.clue-part:last-child {
+  border-bottom: 0;
+}
+
+.clue-part-text {
+  display: -webkit-box;
+
+  overflow: hidden;
+
+  word-break: break-word;
+
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+.clue-arrow {
+  position: absolute;
+
+  right: 2px;
+  bottom: 0;
+
+  color: #111827;
+
+  font-size: 10px;
+  font-weight: 900;
+}
+
+
+/* ============================================================
+   CLUE DIRECTION POSITIONING
+============================================================ */
+
+.clue-part[data-direction="left"] .clue-arrow {
+  right: auto;
+  left: 2px;
+}
+
+.clue-part[data-direction="up"] .clue-arrow {
+  top: 0;
+  right: 2px;
+  bottom: auto;
+}
+
+.clue-part[data-direction="down"] .clue-arrow {
+  right: 2px;
+  bottom: 0;
+}
+
+
+/* ============================================================
+   GRID STATUS
+============================================================ */
+
+.grid-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+
+  margin-top: 15px;
+  padding-top: 14px;
+
+  border-top: 1px solid var(--border);
+}
+
+.status-main {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  color: var(--text-soft);
+
+  font-size: 13px;
+}
+
+.status-indicator {
+  width: 9px;
+  height: 9px;
+
+  border-radius: 50%;
+
+  background: var(--text-light);
+}
+
+.status-indicator.valid {
+  background: var(--success);
+}
+
+.status-indicator.invalid {
+  background: var(--danger);
+}
+
+.status-indicator.warning {
+  background: var(--warning);
+}
+
+.status-stats {
+  display: flex;
+  gap: 18px;
+
+  color: var(--text-soft);
+
+  font-size: 11px;
+}
+
+.status-stats strong {
+  color: var(--text);
+}
+
+
+/* ============================================================
+   EDITOR PANEL
+============================================================ */
+
+.editor-panel {
+  position: sticky;
+  top: 96px;
+
+  max-height: calc(100vh - 118px);
+
+  padding: 18px;
+
+  overflow-y: auto;
+}
+
+.editor-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  margin-bottom: 18px;
+}
+
+.eyebrow {
+  display: block;
+
+  margin-bottom: 4px;
+
+  color: var(--primary);
+
+  font-size: 10px;
+  font-weight: 800;
+
+  letter-spacing: 0.12em;
+}
+
+.editor-header h2,
+.validation-header h2 {
+  margin: 0;
+
+  font-size: 17px;
+}
+
+.coordinates {
+  padding: 5px 8px;
+
+  border-radius: 6px;
+
+  background: var(--surface-soft);
+  color: var(--text-soft);
+
+  font-size: 11px;
+  font-weight: 700;
+}
+
+
+/* ============================================================
+   EMPTY EDITOR
+============================================================ */
+
+.empty-editor-state {
+  padding: 45px 20px;
+
+  color: var(--text-soft);
+
+  text-align: center;
+}
+
+.empty-editor-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 48px;
+  height: 48px;
+
+  margin: 0 auto 13px;
+
+  border: 1px dashed var(--border-dark);
+  border-radius: 12px;
+
+  background: var(--surface-soft);
+
+  color: var(--primary);
+
+  font-size: 24px;
+}
+
+.empty-editor-state h3 {
+  margin-bottom: 5px;
+
+  color: var(--text);
+
+  font-size: 15px;
+}
+
+.empty-editor-state p {
+  max-width: 250px;
+
+  margin: auto;
+
+  font-size: 12px;
+}
+
+
+/* ============================================================
+   EDITOR SECTIONS
+============================================================ */
+
+.editor-section {
+  padding: 16px 0;
+
+  border-top: 1px solid var(--border);
+}
+
+.section-label {
+  margin-bottom: 9px;
+}
+
+.field-help {
+  margin: 7px 0 0;
+
+  color: var(--text-light);
+
+  font-size: 11px;
+}
+
+
+/* ============================================================
+   CELL TYPE SELECTOR
+============================================================ */
+
+.cell-type-options {
+  display: grid;
+
+  grid-template-columns: repeat(3, 1fr);
+
+  gap: 7px;
+}
+
+.cell-type-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+
+  padding: 9px 4px;
+
+  border: 1px solid var(--border);
+  border-radius: 8px;
+
+  background: #ffffff;
+  color: var(--text-soft);
+
+  font-size: 10px;
+  font-weight: 650;
+}
+
+.cell-type-button:hover {
+  border-color: var(--border-dark);
+}
+
+.cell-type-button.active {
+  border-color: var(--primary);
+
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+
+.type-preview {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 28px;
+  height: 28px;
+
+  border: 1px solid #667085;
+
+  background: #ffffff;
+  color: #111827;
+
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.clue-preview {
+  background: #eef2f6;
+}
+
+.blocked-preview {
+  background: var(--blocked);
+}
+
+
+/* ============================================================
+   CLUE COUNT
+============================================================ */
+
+.clue-count-selector {
+  display: grid;
+
+  grid-template-columns: repeat(3, 1fr);
+
+  gap: 6px;
+}
+
+.clue-count-button {
+  min-height: 35px;
+
+  border: 1px solid var(--border);
+  border-radius: 7px;
+
+  background: #ffffff;
+  color: var(--text-soft);
+
+  font-weight: 700;
+}
+
+.clue-count-button:hover {
+  border-color: var(--border-dark);
+}
+
+.clue-count-button.active {
+  border-color: var(--primary);
+
+  background: var(--primary);
+  color: #ffffff;
+}
+
+
+/* ============================================================
+   INDIVIDUAL CLUE EDITOR
+============================================================ */
+
+.clue-editor {
+  margin: 11px 0;
+  padding: 13px;
+
+  border: 1px solid var(--border);
+  border-radius: 10px;
+
+  background: var(--surface-soft);
+}
+
+.clue-editor-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin-bottom: 12px;
+
+  color: #344054;
+
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.clue-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 21px;
+  height: 21px;
+
+  border-radius: 50%;
+
+  background: var(--primary-soft);
+  color: var(--primary);
+
+  font-size: 10px;
+}
+
+
+/* ============================================================
+   DIRECTION SELECTOR
+============================================================ */
+
+.direction-selector {
+  display: grid;
+
+  grid-template-columns: repeat(4, 1fr);
+
+  gap: 6px;
+}
+
+.direction-button {
+  min-height: 38px;
+
+  border: 1px solid var(--border);
+  border-radius: 7px;
+
+  background: #ffffff;
+  color: #344054;
+
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.direction-button:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.direction-button.active {
+  border-color: var(--primary);
+
+  background: var(--primary);
+  color: #ffffff;
+}
+
+
+/* ============================================================
+   EDITOR ACTIONS
+============================================================ */
+
+.editor-actions {
+  margin-top: 15px;
+}
+
+.editor-footer {
+  margin-top: 18px;
+  padding-top: 15px;
+
+  border-top: 1px solid var(--border);
+}
+
+
+/* ============================================================
+   VALIDATION PANEL
+============================================================ */
+
+.validation-panel {
+  margin-top: 18px;
+  padding: 18px;
+}
+
+.validation-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  margin-bottom: 15px;
+}
+
+.validation-summary {
+  display: grid;
+
+  grid-template-columns: repeat(3, 1fr);
+
+  gap: 10px;
+
+  margin-bottom: 14px;
+}
+
+.validation-summary-item {
+  padding: 12px;
+
+  border: 1px solid var(--border);
+  border-radius: 8px;
+
+  background: var(--surface-soft);
+
+  text-align: center;
+}
+
+.validation-summary-item strong {
+  display: block;
+
+  margin-bottom: 2px;
+
+  font-size: 19px;
+}
+
+.validation-summary-item span {
+  color: var(--text-soft);
+
+  font-size: 10px;
+}
+
+.validation-issues {
+  display: flex;
+  flex-direction: column;
+
+  gap: 7px;
+}
+
+.validation-issue {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+
+  padding: 10px 12px;
+
+  border: 1px solid var(--border);
+  border-radius: 8px;
+
+  background: #ffffff;
+
+  color: var(--text-soft);
+
+  font-size: 12px;
+}
+
+.validation-issue.error {
+  border-color: #f0caca;
+
+  background: var(--danger-soft);
+}
+
+.validation-issue.warning {
+  border-color: #f0ddb8;
+
+  background: var(--warning-soft);
+}
+
+.validation-issue.success {
+  border-color: #c4e5d5;
+
+  background: var(--success-soft);
+}
+
+
+/* ============================================================
+   PREVIEW VIEW
+============================================================ */
+
+.preview-view {
+  width: 100%;
+}
+
+.preview-page {
+  width: min(1100px, 100%);
+
+  margin: 0 auto;
+  padding: 42px;
+
+  border: 1px solid var(--border);
+  border-radius: 4px;
+
+  background: #ffffff;
+
+  box-shadow: var(--shadow);
+}
+
+.print-header {
+  margin-bottom: 30px;
+
+  text-align: center;
+}
+
+.print-header h1 {
+  margin-bottom: 5px;
+
+  color: #111111;
+
+  font-size: 26px;
+}
+
+.print-header p {
+  margin: 0;
+
+  color: #555555;
+
+  font-size: 12px;
+}
+
+.preview-grid-wrapper {
+  overflow: auto;
+
+  width: 100%;
+}
+
+.preview-grid {
+  margin: auto;
+}
+
+.preview-grid .grid-cell {
+  cursor: default;
+}
+
+.preview-grid .grid-cell:hover {
+  box-shadow: none;
+}
+
+/*
+   Hide solution letters in Reader/Preview mode.
+*/
+
+.preview-grid .letter-cell .cell-letter {
+  color: transparent;
+}
+
+
+/* ============================================================
+   TOAST
+============================================================ */
+
+.toast {
+  position: fixed;
+
+  right: 24px;
+  bottom: 24px;
+
+  z-index: 500;
+
+  max-width: 360px;
+
+  padding: 11px 15px;
+
+  border-radius: 9px;
+
+  background: #172033;
+  color: #ffffff;
+
+  box-shadow:
+    0 12px 35px rgba(16, 24, 40, 0.22);
+
+  font-size: 12px;
+
+  opacity: 0;
+  pointer-events: none;
+
+  transform: translateY(10px);
+
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
+}
+
+.toast.show {
+  opacity: 1;
+
+  transform: translateY(0);
+}
+
+
+/* ============================================================
+   SCROLLBAR
+============================================================ */
+
+.editor-panel::-webkit-scrollbar,
+.grid-scroll::-webkit-scrollbar,
+.preview-grid-wrapper::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.editor-panel::-webkit-scrollbar-thumb,
+.grid-scroll::-webkit-scrollbar-thumb,
+.preview-grid-wrapper::-webkit-scrollbar-thumb {
+  border-radius: 20px;
+
+  background: #c7ced8;
+}
+
+.editor-panel::-webkit-scrollbar-track,
+.grid-scroll::-webkit-scrollbar-track,
+.preview-grid-wrapper::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+
+/* ============================================================
+   RESPONSIVE
+============================================================ */
+
+@media (max-width: 1100px) {
+
+  .workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .editor-panel {
+    position: static;
+
+    max-height: none;
+  }
+
+  .toolbar {
+    align-items: stretch;
+
+    flex-direction: column;
+  }
+
+  .title-field {
+    max-width: none;
+  }
+
+  .grid-size-controls {
+    flex-wrap: wrap;
+  }
+}
+
+
+@media (max-width: 720px) {
+
+  :root {
+    --cell-size: 42px;
+  }
+
+  .app-header {
+    position: static;
+
+    align-items: stretch;
+    flex-direction: column;
+    gap: 12px;
+
+    padding: 14px 16px;
+  }
+
+  .header-actions {
+    justify-content: space-between;
+  }
+
+  .app-container {
+    width: calc(100% - 20px);
+
+    margin-top: 12px;
+  }
+
+  .toolbar,
+  .grid-section,
+  .editor-panel {
+    padding: 14px;
+  }
+
+  .section-heading {
+    flex-direction: column;
+  }
+
+  .grid-scroll {
+    min-height: 420px;
+
+    padding: 10px;
+  }
+
+  .status-stats {
+    display: none;
+  }
+
+  .preview-page {
+    padding: 20px 10px;
+  }
+
+  .brand-text p {
+    display: none;
+  }
+}
+
+
+/* ============================================================
+   PRINT / PDF
+============================================================ */
+
+@media print {
+
+  @page {
+    size: A4;
+    margin: 12mm;
+  }
+
+  html,
+  body {
+    margin: 0;
+    padding: 0;
+
+    background: #ffffff;
+  }
+
+  body {
+    color: #000000;
+  }
+
+  .app-header,
+  .toolbar,
+  #creatorView,
+  .validation-panel,
+  .toast {
+    display: none !important;
+  }
+
+  .app-container {
+    width: 100%;
+
+    margin: 0;
+    padding: 0;
+  }
+
+  #previewView {
+    display: block !important;
+  }
+
+  .preview-page {
+    width: 100%;
+
+    margin: 0;
+    padding: 0;
+
+    border: 0;
+    border-radius: 0;
+
+    box-shadow: none;
+  }
+
+  .print-header {
+    margin-bottom: 8mm;
+  }
+
+  .print-header h1 {
+    font-size: 20pt;
+  }
+
+  .print-header p {
+    font-size: 9pt;
+  }
+
+  .preview-grid-wrapper {
+    overflow: visible;
+  }
+
+  .crossword-grid {
+    break-inside: avoid;
+
+    margin: 0 auto;
+
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  .grid-cell {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  .grid-cell.blocked-cell {
+    background: #222222 !important;
+  }
+
+  .grid-cell.clue-cell {
+    background: #eeeeee !important;
+  }
+
+  /*
+     Never print solution letters on the puzzle PDF.
+  */
+
+  .preview-grid .letter-cell .cell-letter {
+    color: transparent !important;
+  }
+}
